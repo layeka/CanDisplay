@@ -1,0 +1,130 @@
+   1               		.file	"at90can_buffer.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__RAMPZ__ = 0x3b
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+  10               		.cfi_sections	.debug_frame
+  11               	.global	can_check_message
+  13               	can_check_message:
+  14               	.LFB18:
+  15               		.file 1 "at90can_buffer.c"
+   1:at90can_buffer.c **** // ----------------------------------------------------------------------------
+   2:at90can_buffer.c **** /*
+   3:at90can_buffer.c ****  * Copyright (c) 2007 Fabian Greif, Roboterclub Aachen e.V.
+   4:at90can_buffer.c ****  *  All rights reserved.
+   5:at90can_buffer.c ****  *
+   6:at90can_buffer.c ****  * Redistribution and use in source and binary forms, with or without
+   7:at90can_buffer.c ****  * modification, are permitted provided that the following conditions
+   8:at90can_buffer.c ****  * are met:
+   9:at90can_buffer.c ****  * 1. Redistributions of source code must retain the above copyright
+  10:at90can_buffer.c ****  *    notice, this list of conditions and the following disclaimer.
+  11:at90can_buffer.c ****  * 2. Redistributions in binary form must reproduce the above copyright
+  12:at90can_buffer.c ****  *    notice, this list of conditions and the following disclaimer in the
+  13:at90can_buffer.c ****  *    documentation and/or other materials provided with the distribution.
+  14:at90can_buffer.c ****  *
+  15:at90can_buffer.c ****  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+  16:at90can_buffer.c ****  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  17:at90can_buffer.c ****  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  18:at90can_buffer.c ****  * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+  19:at90can_buffer.c ****  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  20:at90can_buffer.c ****  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+  21:at90can_buffer.c ****  * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+  22:at90can_buffer.c ****  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+  23:at90can_buffer.c ****  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+  24:at90can_buffer.c ****  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  25:at90can_buffer.c ****  * SUCH DAMAGE.
+  26:at90can_buffer.c ****  *
+  27:at90can_buffer.c ****  * $Id: at90can_buffer.c 6565 2008-06-14 11:35:58Z fabian $
+  28:at90can_buffer.c ****  */
+  29:at90can_buffer.c **** // ----------------------------------------------------------------------------
+  30:at90can_buffer.c **** 
+  31:at90can_buffer.c **** #include "at90can_private.h"
+  32:at90can_buffer.c **** #ifdef	SUPPORT_FOR_AT90CAN__
+  33:at90can_buffer.c **** 
+  34:at90can_buffer.c **** // ----------------------------------------------------------------------------
+  35:at90can_buffer.c **** // Checks if there is any waiting message in the registers
+  36:at90can_buffer.c **** 
+  37:at90can_buffer.c **** bool at90can_check_message(void)
+  38:at90can_buffer.c **** {
+  16               		.loc 1 38 0
+  17               		.cfi_startproc
+  18               	/* prologue: function */
+  19               	/* frame size = 0 */
+  20               	/* stack size = 0 */
+  21               	.L__stack_usage = 0
+  39:at90can_buffer.c **** 	#if CAN_RX_BUFFER_SIZE == 0
+  40:at90can_buffer.c **** 	if (_messages_waiting > 0)
+  22               		.loc 1 40 0
+  23 0000 9091 0000 		lds r25,_messages_waiting
+  24 0004 81E0      		ldi r24,lo8(1)
+  25 0006 9111      		cpse r25,__zero_reg__
+  26 0008 00C0      		rjmp .L2
+  27 000a 80E0      		ldi r24,0
+  28               	.L2:
+  41:at90can_buffer.c **** 		return true;
+  42:at90can_buffer.c **** 	else
+  43:at90can_buffer.c **** 		return false;
+  44:at90can_buffer.c **** 	#else
+  45:at90can_buffer.c **** 	return !can_buffer_empty( &can_rx_buffer );
+  46:at90can_buffer.c **** 	#endif
+  47:at90can_buffer.c **** }
+  29               		.loc 1 47 0
+  30 000c 0895      		ret
+  31               		.cfi_endproc
+  32               	.LFE18:
+  34               	.global	can_check_free_buffer
+  36               	can_check_free_buffer:
+  37               	.LFB19:
+  48:at90can_buffer.c **** 
+  49:at90can_buffer.c **** // ----------------------------------------------------------------------------
+  50:at90can_buffer.c **** 
+  51:at90can_buffer.c **** bool at90can_check_free_buffer(void)
+  52:at90can_buffer.c **** {
+  38               		.loc 1 52 0
+  39               		.cfi_startproc
+  40               	/* prologue: function */
+  41               	/* frame size = 0 */
+  42               	/* stack size = 0 */
+  43               	.L__stack_usage = 0
+  53:at90can_buffer.c **** 	#if CAN_TX_BUFFER_SIZE == 0
+  54:at90can_buffer.c **** 	// check if there is any free MOb
+  55:at90can_buffer.c **** 	if (_free_buffer > 0)
+  44               		.loc 1 55 0
+  45 000e 9091 0000 		lds r25,_free_buffer
+  46 0012 81E0      		ldi r24,lo8(1)
+  47 0014 9111      		cpse r25,__zero_reg__
+  48 0016 00C0      		rjmp .L5
+  49 0018 80E0      		ldi r24,0
+  50               	.L5:
+  56:at90can_buffer.c **** 		return true;
+  57:at90can_buffer.c **** 	else
+  58:at90can_buffer.c **** 		return false;
+  59:at90can_buffer.c **** 	#else
+  60:at90can_buffer.c **** 	return !can_buffer_full( &can_tx_buffer );
+  61:at90can_buffer.c **** 	#endif
+  62:at90can_buffer.c **** }
+  51               		.loc 1 62 0
+  52 001a 0895      		ret
+  53               		.cfi_endproc
+  54               	.LFE19:
+  56               	.Letext0:
+  57               		.file 2 "at90can_private.h"
+  58               		.file 3 "/usr/lib/avr/include/stdint.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 at90can_buffer.c
+     /tmp/ccE1RQ7P.s:2      *ABS*:0000003e __SP_H__
+     /tmp/ccE1RQ7P.s:3      *ABS*:0000003d __SP_L__
+     /tmp/ccE1RQ7P.s:4      *ABS*:0000003f __SREG__
+     /tmp/ccE1RQ7P.s:5      *ABS*:0000003b __RAMPZ__
+     /tmp/ccE1RQ7P.s:6      *ABS*:00000000 __tmp_reg__
+     /tmp/ccE1RQ7P.s:7      *ABS*:00000001 __zero_reg__
+     /tmp/ccE1RQ7P.s:13     .text:00000000 can_check_message
+     /tmp/ccE1RQ7P.s:36     .text:0000000e can_check_free_buffer
+
+UNDEFINED SYMBOLS
+_messages_waiting
+_free_buffer

@@ -1,0 +1,471 @@
+   1               		.file	"at90can_get_dyn_filter.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__RAMPZ__ = 0x3b
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+  10               		.cfi_sections	.debug_frame
+  11               	.global	can_get_filter
+  13               	can_get_filter:
+  14               	.LFB18:
+  15               		.file 1 "at90can_get_dyn_filter.c"
+   1:at90can_get_dyn_filter.c **** // ----------------------------------------------------------------------------
+   2:at90can_get_dyn_filter.c **** /*
+   3:at90can_get_dyn_filter.c ****  * Copyright (c) 2007 Fabian Greif, Roboterclub Aachen e.V.
+   4:at90can_get_dyn_filter.c ****  *  All rights reserved.
+   5:at90can_get_dyn_filter.c ****  *
+   6:at90can_get_dyn_filter.c ****  * Redistribution and use in source and binary forms, with or without
+   7:at90can_get_dyn_filter.c ****  * modification, are permitted provided that the following conditions
+   8:at90can_get_dyn_filter.c ****  * are met:
+   9:at90can_get_dyn_filter.c ****  * 1. Redistributions of source code must retain the above copyright
+  10:at90can_get_dyn_filter.c ****  *    notice, this list of conditions and the following disclaimer.
+  11:at90can_get_dyn_filter.c ****  * 2. Redistributions in binary form must reproduce the above copyright
+  12:at90can_get_dyn_filter.c ****  *    notice, this list of conditions and the following disclaimer in the
+  13:at90can_get_dyn_filter.c ****  *    documentation and/or other materials provided with the distribution.
+  14:at90can_get_dyn_filter.c ****  *
+  15:at90can_get_dyn_filter.c ****  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+  16:at90can_get_dyn_filter.c ****  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  17:at90can_get_dyn_filter.c ****  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  18:at90can_get_dyn_filter.c ****  * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+  19:at90can_get_dyn_filter.c ****  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  20:at90can_get_dyn_filter.c ****  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+  21:at90can_get_dyn_filter.c ****  * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+  22:at90can_get_dyn_filter.c ****  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+  23:at90can_get_dyn_filter.c ****  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+  24:at90can_get_dyn_filter.c ****  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  25:at90can_get_dyn_filter.c ****  * SUCH DAMAGE.
+  26:at90can_get_dyn_filter.c ****  *
+  27:at90can_get_dyn_filter.c ****  * $Id: at90can_get_dyn_filter.c 6837 2008-11-16 19:05:15Z fabian $
+  28:at90can_get_dyn_filter.c ****  */
+  29:at90can_get_dyn_filter.c **** // ----------------------------------------------------------------------------
+  30:at90can_get_dyn_filter.c **** 
+  31:at90can_get_dyn_filter.c **** #include "at90can_private.h"
+  32:at90can_get_dyn_filter.c **** #ifdef	SUPPORT_FOR_AT90CAN__
+  33:at90can_get_dyn_filter.c **** 
+  34:at90can_get_dyn_filter.c **** // ----------------------------------------------------------------------------
+  35:at90can_get_dyn_filter.c **** 
+  36:at90can_get_dyn_filter.c **** uint8_t at90can_get_filter(uint8_t number, can_filter_t *filter)
+  37:at90can_get_dyn_filter.c **** {
+  16               		.loc 1 37 0
+  17               		.cfi_startproc
+  18               	.LVL0:
+  19 0000 0F93      		push r16
+  20               	.LCFI0:
+  21               		.cfi_def_cfa_offset 3
+  22               		.cfi_offset 16, -2
+  23 0002 1F93      		push r17
+  24               	.LCFI1:
+  25               		.cfi_def_cfa_offset 4
+  26               		.cfi_offset 17, -3
+  27 0004 CF93      		push r28
+  28               	.LCFI2:
+  29               		.cfi_def_cfa_offset 5
+  30               		.cfi_offset 28, -4
+  31               	/* prologue: function */
+  32               	/* frame size = 0 */
+  33               	/* stack size = 3 */
+  34               	.L__stack_usage = 3
+  35 0006 FB01      		movw r30,r22
+  38:at90can_get_dyn_filter.c **** 	if (number > 14) {
+  36               		.loc 1 38 0
+  37 0008 8F30      		cpi r24,lo8(15)
+  38 000a 00F0      		brlo .+2
+  39 000c 00C0      		rjmp .L9
+  39:at90can_get_dyn_filter.c **** 		// it is only possible to serve a maximum of 15 filters
+  40:at90can_get_dyn_filter.c **** 		return 0;
+  41:at90can_get_dyn_filter.c **** 	}
+  42:at90can_get_dyn_filter.c **** 	
+  43:at90can_get_dyn_filter.c **** 	// load corresponding MOb page
+  44:at90can_get_dyn_filter.c **** 	CANPAGE = number << 4;
+  40               		.loc 1 44 0
+  41 000e 8295      		swap r24
+  42               	.LVL1:
+  43 0010 807F      		andi r24,lo8(-16)
+  44 0012 8093 ED00 		sts 237,r24
+  45:at90can_get_dyn_filter.c **** 	
+  46:at90can_get_dyn_filter.c **** 	if ((CANCDMOB & 0xc0) == 0) {
+  45               		.loc 1 46 0
+  46 0016 8091 EF00 		lds r24,239
+  47 001a 807C      		andi r24,lo8(-64)
+  48 001c 01F4      		brne .+2
+  49 001e 00C0      		rjmp .L10
+  47:at90can_get_dyn_filter.c **** 		// MOb is currently not used.
+  48:at90can_get_dyn_filter.c **** 		return 2;
+  49:at90can_get_dyn_filter.c **** 	}
+  50:at90can_get_dyn_filter.c **** 	else if ((CANCDMOB & 0xc0) == (1 << CONMOB1))
+  50               		.loc 1 50 0
+  51 0020 8091 EF00 		lds r24,239
+  52 0024 807C      		andi r24,lo8(-64)
+  53 0026 8038      		cpi r24,lo8(-128)
+  54 0028 01F0      		breq .+2
+  55 002a 00C0      		rjmp .L11
+  51:at90can_get_dyn_filter.c **** 	{
+  52:at90can_get_dyn_filter.c **** 		// MOb is configured to receive message => read filter.
+  53:at90can_get_dyn_filter.c **** 		if (CANIDM4 & (1 << RTRMSK))
+  56               		.loc 1 53 0
+  57 002c 9091 F400 		lds r25,244
+  58 0030 8085      		ldd r24,Z+8
+  59 0032 92FF      		sbrs r25,2
+  60 0034 00C0      		rjmp .L3
+  54:at90can_get_dyn_filter.c **** 		{
+  55:at90can_get_dyn_filter.c **** 			if (CANIDT4 & (1 << RTRMSK))
+  61               		.loc 1 55 0
+  62 0036 9091 F000 		lds r25,240
+  63 003a 92FF      		sbrs r25,2
+  64 003c 00C0      		rjmp .L4
+  56:at90can_get_dyn_filter.c **** 			{
+  57:at90can_get_dyn_filter.c **** 				// receive only messages with RTR-bit set
+  58:at90can_get_dyn_filter.c **** 				filter->flags.rtr = 0x3;
+  65               		.loc 1 58 0
+  66 003e 8360      		ori r24,lo8(3)
+  67 0040 00C0      		rjmp .L18
+  68               	.L4:
+  59:at90can_get_dyn_filter.c **** 			}
+  60:at90can_get_dyn_filter.c **** 			else {
+  61:at90can_get_dyn_filter.c **** 				filter->flags.rtr = 0x2;
+  69               		.loc 1 61 0
+  70 0042 8C7F      		andi r24,lo8(-4)
+  71 0044 8260      		ori r24,lo8(2)
+  72 0046 00C0      		rjmp .L18
+  73               	.L3:
+  62:at90can_get_dyn_filter.c **** 			}
+  63:at90can_get_dyn_filter.c **** 		}
+  64:at90can_get_dyn_filter.c **** 		else {
+  65:at90can_get_dyn_filter.c **** 			// receive all message, independent from RTR-bit
+  66:at90can_get_dyn_filter.c **** 			filter->flags.rtr = 0;
+  74               		.loc 1 66 0
+  75 0048 8C7F      		andi r24,lo8(-4)
+  76               	.L18:
+  77 004a 8087      		std Z+8,r24
+  67:at90can_get_dyn_filter.c **** 		}
+  68:at90can_get_dyn_filter.c **** 		
+  69:at90can_get_dyn_filter.c **** 		#if SUPPORT_EXTENDED_CANID
+  70:at90can_get_dyn_filter.c **** 		
+  71:at90can_get_dyn_filter.c **** 		if ((CANIDM4 & (1 << IDEMSK)) && (CANCDMOB & (1 << IDE)))
+  78               		.loc 1 71 0
+  79 004c 9091 F400 		lds r25,244
+  80 0050 8085      		ldd r24,Z+8
+  81 0052 90FF      		sbrs r25,0
+  82 0054 00C0      		rjmp .L6
+  83               		.loc 1 71 0 is_stmt 0 discriminator 1
+  84 0056 9091 EF00 		lds r25,239
+  85 005a 94FF      		sbrs r25,4
+  86 005c 00C0      		rjmp .L6
+  87               	.LBB2:
+  72:at90can_get_dyn_filter.c **** 		{
+  73:at90can_get_dyn_filter.c **** 			filter->flags.extended = 0x3;
+  88               		.loc 1 73 0 is_stmt 1
+  89 005e 8C60      		ori r24,lo8(12)
+  90 0060 8087      		std Z+8,r24
+  74:at90can_get_dyn_filter.c **** 			
+  75:at90can_get_dyn_filter.c **** 			// extended id
+  76:at90can_get_dyn_filter.c **** 			uint32_t mask;
+  77:at90can_get_dyn_filter.c **** 			mask  = (uint8_t)  CANIDM4 >> 3;
+  91               		.loc 1 77 0
+  92 0062 9091 F400 		lds r25,244
+  93 0066 9695      		lsr r25
+  94 0068 9695      		lsr r25
+  95 006a 9695      		lsr r25
+  96               	.LVL2:
+  78:at90can_get_dyn_filter.c **** 			mask |= (uint16_t) CANIDM3 << 5;
+  97               		.loc 1 78 0
+  98 006c 2091 F500 		lds r18,245
+  99               	.LVL3:
+  79:at90can_get_dyn_filter.c **** 			mask |= (uint32_t) CANIDM2 << 13;
+ 100               		.loc 1 79 0
+ 101 0070 4091 F600 		lds r20,246
+ 102               	.LVL4:
+  80:at90can_get_dyn_filter.c **** 			mask |= (uint32_t) CANIDM1 << 21;
+ 103               		.loc 1 80 0
+ 104 0074 8091 F700 		lds r24,247
+  79:at90can_get_dyn_filter.c **** 			mask |= (uint32_t) CANIDM2 << 13;
+ 105               		.loc 1 79 0
+ 106 0078 50E0      		ldi r21,0
+ 107 007a 60E0      		ldi r22,0
+ 108 007c 70E0      		ldi r23,0
+ 109               	.LVL5:
+ 110 007e 3DE0      		ldi r19,13
+ 111               		1:
+ 112 0080 440F      		lsl r20
+ 113 0082 551F      		rol r21
+ 114 0084 661F      		rol r22
+ 115 0086 771F      		rol r23
+ 116 0088 3A95      		dec r19
+ 117 008a 01F4      		brne 1b
+ 118               	.LVL6:
+  78:at90can_get_dyn_filter.c **** 			mask |= (uint16_t) CANIDM3 << 5;
+ 119               		.loc 1 78 0
+ 120 008c 492B      		or r20,r25
+ 121               		.loc 1 80 0
+ 122 008e 90E0      		ldi r25,0
+ 123 0090 A0E0      		ldi r26,0
+ 124 0092 B0E0      		ldi r27,0
+ 125 0094 C5E1      		ldi r28,21
+ 126               		1:
+ 127 0096 880F      		lsl r24
+ 128 0098 991F      		rol r25
+ 129 009a AA1F      		rol r26
+ 130 009c BB1F      		rol r27
+ 131 009e CA95      		dec r28
+ 132 00a0 01F4      		brne 1b
+  79:at90can_get_dyn_filter.c **** 			mask |= (uint32_t) CANIDM2 << 13;
+ 133               		.loc 1 79 0
+ 134 00a2 482B      		or r20,r24
+ 135 00a4 592B      		or r21,r25
+ 136 00a6 6A2B      		or r22,r26
+ 137 00a8 7B2B      		or r23,r27
+  78:at90can_get_dyn_filter.c **** 			mask |= (uint16_t) CANIDM3 << 5;
+ 138               		.loc 1 78 0
+ 139 00aa 30E2      		ldi r19,lo8(32)
+ 140 00ac 239F      		mul r18,r19
+ 141 00ae C001      		movw r24,r0
+ 142 00b0 1124      		clr __zero_reg__
+ 143 00b2 A0E0      		ldi r26,0
+ 144 00b4 B0E0      		ldi r27,0
+ 145               		.loc 1 80 0
+ 146 00b6 482B      		or r20,r24
+ 147 00b8 592B      		or r21,r25
+ 148 00ba 6A2B      		or r22,r26
+ 149 00bc 7B2B      		or r23,r27
+ 150               	.LVL7:
+  81:at90can_get_dyn_filter.c **** 			
+  82:at90can_get_dyn_filter.c **** 			filter->mask = mask;
+ 151               		.loc 1 82 0
+ 152 00be 4483      		std Z+4,r20
+ 153 00c0 5583      		std Z+5,r21
+ 154 00c2 6683      		std Z+6,r22
+ 155 00c4 7783      		std Z+7,r23
+  83:at90can_get_dyn_filter.c **** 			
+  84:at90can_get_dyn_filter.c **** 			uint32_t id;
+  85:at90can_get_dyn_filter.c **** 			id  = (uint8_t)  CANIDT4 >> 3;
+ 156               		.loc 1 85 0
+ 157 00c6 2091 F000 		lds r18,240
+ 158 00ca 2695      		lsr r18
+ 159 00cc 2695      		lsr r18
+ 160 00ce 2695      		lsr r18
+ 161               	.LVL8:
+  86:at90can_get_dyn_filter.c **** 			id |= (uint16_t) CANIDT3 << 5;
+ 162               		.loc 1 86 0
+ 163 00d0 C091 F100 		lds r28,241
+ 164               	.LVL9:
+  87:at90can_get_dyn_filter.c **** 			id |= (uint32_t) CANIDT2 << 13;
+ 165               		.loc 1 87 0
+ 166 00d4 8091 F200 		lds r24,242
+ 167               	.LVL10:
+  88:at90can_get_dyn_filter.c **** 			id |= (uint32_t) CANIDT1 << 21;
+ 168               		.loc 1 88 0
+ 169 00d8 0091 F300 		lds r16,243
+  87:at90can_get_dyn_filter.c **** 			id |= (uint32_t) CANIDT2 << 13;
+ 170               		.loc 1 87 0
+ 171 00dc 90E0      		ldi r25,0
+ 172 00de A0E0      		ldi r26,0
+ 173 00e0 B0E0      		ldi r27,0
+ 174 00e2 1DE0      		ldi r17,13
+ 175               		1:
+ 176 00e4 880F      		lsl r24
+ 177 00e6 991F      		rol r25
+ 178 00e8 AA1F      		rol r26
+ 179 00ea BB1F      		rol r27
+ 180 00ec 1A95      		dec r17
+ 181 00ee 01F4      		brne 1b
+ 182               	.LVL11:
+  86:at90can_get_dyn_filter.c **** 			id |= (uint16_t) CANIDT3 << 5;
+ 183               		.loc 1 86 0
+ 184 00f0 822B      		or r24,r18
+ 185               		.loc 1 88 0
+ 186 00f2 10E0      		ldi r17,0
+ 187 00f4 20E0      		ldi r18,0
+ 188 00f6 30E0      		ldi r19,0
+ 189 00f8 0F2E      		mov r0,r31
+ 190 00fa F5E1      		ldi r31,21
+ 191               		1:
+ 192 00fc 000F      		lsl r16
+ 193 00fe 111F      		rol r17
+ 194 0100 221F      		rol r18
+ 195 0102 331F      		rol r19
+ 196 0104 FA95      		dec r31
+ 197 0106 01F4      		brne 1b
+ 198 0108 F02D      		mov r31,r0
+  87:at90can_get_dyn_filter.c **** 			id |= (uint32_t) CANIDT2 << 13;
+ 199               		.loc 1 87 0
+ 200 010a 802B      		or r24,r16
+ 201 010c 912B      		or r25,r17
+ 202 010e A22B      		or r26,r18
+ 203 0110 B32B      		or r27,r19
+ 204               	.LVL12:
+  86:at90can_get_dyn_filter.c **** 			id |= (uint16_t) CANIDT3 << 5;
+ 205               		.loc 1 86 0
+ 206 0112 20E2      		ldi r18,lo8(32)
+ 207 0114 C29F      		mul r28,r18
+ 208 0116 8001      		movw r16,r0
+ 209 0118 1124      		clr __zero_reg__
+ 210 011a 20E0      		ldi r18,0
+ 211 011c 30E0      		ldi r19,0
+ 212               		.loc 1 88 0
+ 213 011e 802B      		or r24,r16
+ 214 0120 912B      		or r25,r17
+ 215 0122 A22B      		or r26,r18
+ 216 0124 B32B      		or r27,r19
+ 217               	.LVL13:
+  89:at90can_get_dyn_filter.c **** 			
+  90:at90can_get_dyn_filter.c **** 			// only the bits set in the mask are vaild for the id
+  91:at90can_get_dyn_filter.c **** 			filter->id = id & mask;
+ 218               		.loc 1 91 0
+ 219 0126 8423      		and r24,r20
+ 220 0128 9523      		and r25,r21
+ 221 012a A623      		and r26,r22
+ 222 012c B723      		and r27,r23
+ 223 012e 00C0      		rjmp .L19
+ 224               	.LVL14:
+ 225               	.L6:
+ 226               	.LBE2:
+ 227               	.LBB3:
+  92:at90can_get_dyn_filter.c **** 		}
+  93:at90can_get_dyn_filter.c **** 		else {
+  94:at90can_get_dyn_filter.c **** 			if (CANIDM4 & (1 << IDEMSK)) {
+ 228               		.loc 1 94 0
+ 229 0130 9091 F400 		lds r25,244
+  95:at90can_get_dyn_filter.c **** 				filter->flags.extended = 0x2;
+ 230               		.loc 1 95 0
+ 231 0134 837F      		andi r24,lo8(-13)
+  94:at90can_get_dyn_filter.c **** 			if (CANIDM4 & (1 << IDEMSK)) {
+ 232               		.loc 1 94 0
+ 233 0136 90FD      		sbrc r25,0
+ 234               		.loc 1 95 0
+ 235 0138 8860      		ori r24,lo8(8)
+ 236               	.L7:
+  96:at90can_get_dyn_filter.c **** 			} else {
+  97:at90can_get_dyn_filter.c **** 				filter->flags.extended = 0;
+ 237               		.loc 1 97 0
+ 238 013a 8087      		std Z+8,r24
+  98:at90can_get_dyn_filter.c **** 			}
+  99:at90can_get_dyn_filter.c **** 			
+ 100:at90can_get_dyn_filter.c **** 			uint16_t mask;
+ 101:at90can_get_dyn_filter.c **** 			mask  = (uint8_t)  CANIDM2 >> 5;
+ 239               		.loc 1 101 0
+ 240 013c 8091 F600 		lds r24,246
+ 241 0140 8295      		swap r24
+ 242 0142 8695      		lsr r24
+ 243 0144 8770      		andi r24,lo8(7)
+ 244               	.LVL15:
+ 102:at90can_get_dyn_filter.c **** 			mask |= (uint16_t) CANIDM1 << 3;
+ 245               		.loc 1 102 0
+ 246 0146 2091 F700 		lds r18,247
+ 247 014a 58E0      		ldi r21,lo8(8)
+ 248 014c 259F      		mul r18,r21
+ 249 014e 9001      		movw r18,r0
+ 250 0150 1124      		clr __zero_reg__
+ 251 0152 282B      		or r18,r24
+ 252               	.LVL16:
+ 103:at90can_get_dyn_filter.c **** 			
+ 104:at90can_get_dyn_filter.c **** 			filter->mask = mask;
+ 253               		.loc 1 104 0
+ 254 0154 C901      		movw r24,r18
+ 255 0156 A0E0      		ldi r26,0
+ 256 0158 B0E0      		ldi r27,0
+ 257 015a 8483      		std Z+4,r24
+ 258 015c 9583      		std Z+5,r25
+ 259 015e A683      		std Z+6,r26
+ 260 0160 B783      		std Z+7,r27
+ 105:at90can_get_dyn_filter.c **** 			
+ 106:at90can_get_dyn_filter.c **** 			uint16_t id;
+ 107:at90can_get_dyn_filter.c **** 			id  = (uint8_t)  CANIDT2 >> 5;
+ 261               		.loc 1 107 0
+ 262 0162 4091 F200 		lds r20,242
+ 263 0166 4295      		swap r20
+ 264 0168 4695      		lsr r20
+ 265 016a 4770      		andi r20,lo8(7)
+ 266               	.LVL17:
+ 108:at90can_get_dyn_filter.c **** 			id |= (uint16_t) CANIDT1 << 3;
+ 267               		.loc 1 108 0
+ 268 016c 8091 F300 		lds r24,243
+ 269               	.LVL18:
+ 270 0170 58E0      		ldi r21,lo8(8)
+ 271 0172 859F      		mul r24,r21
+ 272 0174 C001      		movw r24,r0
+ 273 0176 1124      		clr __zero_reg__
+ 274               	.LVL19:
+ 275 0178 842B      		or r24,r20
+ 109:at90can_get_dyn_filter.c **** 			
+ 110:at90can_get_dyn_filter.c **** 			filter->id = id & mask;
+ 276               		.loc 1 110 0
+ 277 017a 8223      		and r24,r18
+ 278 017c 9323      		and r25,r19
+ 279 017e A0E0      		ldi r26,0
+ 280 0180 B0E0      		ldi r27,0
+ 281               	.LVL20:
+ 282               	.L19:
+ 283 0182 8083      		st Z,r24
+ 284 0184 9183      		std Z+1,r25
+ 285 0186 A283      		std Z+2,r26
+ 286 0188 B383      		std Z+3,r27
+ 287               	.LBE3:
+ 111:at90can_get_dyn_filter.c **** 		}
+ 112:at90can_get_dyn_filter.c **** 		
+ 113:at90can_get_dyn_filter.c **** 		#else
+ 114:at90can_get_dyn_filter.c **** 		
+ 115:at90can_get_dyn_filter.c **** 		uint16_t mask;
+ 116:at90can_get_dyn_filter.c **** 		mask  = (uint8_t)  CANIDM2 >> 5;
+ 117:at90can_get_dyn_filter.c **** 		mask |= (uint16_t) CANIDM1 << 3;
+ 118:at90can_get_dyn_filter.c **** 		
+ 119:at90can_get_dyn_filter.c **** 		filter->mask = mask;
+ 120:at90can_get_dyn_filter.c **** 		
+ 121:at90can_get_dyn_filter.c **** 		uint16_t id;
+ 122:at90can_get_dyn_filter.c **** 		id  = (uint8_t)  CANIDT2 >> 5;
+ 123:at90can_get_dyn_filter.c **** 		id |= (uint16_t) CANIDT1 << 3;
+ 124:at90can_get_dyn_filter.c **** 		
+ 125:at90can_get_dyn_filter.c **** 		filter->id = id & mask;
+ 126:at90can_get_dyn_filter.c **** 		
+ 127:at90can_get_dyn_filter.c **** 		#endif
+ 128:at90can_get_dyn_filter.c **** 		
+ 129:at90can_get_dyn_filter.c **** 		return 1;
+ 288               		.loc 1 129 0
+ 289 018a 81E0      		ldi r24,lo8(1)
+ 290 018c 00C0      		rjmp .L2
+ 291               	.LVL21:
+ 292               	.L9:
+  40:at90can_get_dyn_filter.c **** 		return 0;
+ 293               		.loc 1 40 0
+ 294 018e 80E0      		ldi r24,0
+ 295               	.LVL22:
+ 296 0190 00C0      		rjmp .L2
+ 297               	.L10:
+  48:at90can_get_dyn_filter.c **** 		return 2;
+ 298               		.loc 1 48 0
+ 299 0192 82E0      		ldi r24,lo8(2)
+ 300 0194 00C0      		rjmp .L2
+ 301               	.L11:
+ 130:at90can_get_dyn_filter.c **** 	}
+ 131:at90can_get_dyn_filter.c **** 	
+ 132:at90can_get_dyn_filter.c **** 	// MOb is currently used to transmit a message.
+ 133:at90can_get_dyn_filter.c **** 	return 0xff;
+ 302               		.loc 1 133 0
+ 303 0196 8FEF      		ldi r24,lo8(-1)
+ 304               	.LVL23:
+ 305               	.L2:
+ 306               	/* epilogue start */
+ 134:at90can_get_dyn_filter.c **** }
+ 307               		.loc 1 134 0
+ 308 0198 CF91      		pop r28
+ 309 019a 1F91      		pop r17
+ 310 019c 0F91      		pop r16
+ 311 019e 0895      		ret
+ 312               		.cfi_endproc
+ 313               	.LFE18:
+ 315               	.Letext0:
+ 316               		.file 2 "/usr/lib/avr/include/stdint.h"
+ 317               		.file 3 "../can.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 at90can_get_dyn_filter.c
+     /tmp/ccYhMRzX.s:2      *ABS*:0000003e __SP_H__
+     /tmp/ccYhMRzX.s:3      *ABS*:0000003d __SP_L__
+     /tmp/ccYhMRzX.s:4      *ABS*:0000003f __SREG__
+     /tmp/ccYhMRzX.s:5      *ABS*:0000003b __RAMPZ__
+     /tmp/ccYhMRzX.s:6      *ABS*:00000000 __tmp_reg__
+     /tmp/ccYhMRzX.s:7      *ABS*:00000001 __zero_reg__
+     /tmp/ccYhMRzX.s:13     .text:00000000 can_get_filter
+
+NO UNDEFINED SYMBOLS

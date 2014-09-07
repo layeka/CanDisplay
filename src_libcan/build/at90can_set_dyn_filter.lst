@@ -1,0 +1,570 @@
+   1               		.file	"at90can_set_dyn_filter.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__RAMPZ__ = 0x3b
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+  10               		.cfi_sections	.debug_frame
+  11               	.global	can_set_filter
+  13               	can_set_filter:
+  14               	.LFB18:
+  15               		.file 1 "at90can_set_dyn_filter.c"
+   1:at90can_set_dyn_filter.c **** // ----------------------------------------------------------------------------
+   2:at90can_set_dyn_filter.c **** /*
+   3:at90can_set_dyn_filter.c ****  * Copyright (c) 2007 Fabian Greif, Roboterclub Aachen e.V.
+   4:at90can_set_dyn_filter.c ****  *  All rights reserved.
+   5:at90can_set_dyn_filter.c ****  *
+   6:at90can_set_dyn_filter.c ****  * Redistribution and use in source and binary forms, with or without
+   7:at90can_set_dyn_filter.c ****  * modification, are permitted provided that the following conditions
+   8:at90can_set_dyn_filter.c ****  * are met:
+   9:at90can_set_dyn_filter.c ****  * 1. Redistributions of source code must retain the above copyright
+  10:at90can_set_dyn_filter.c ****  *    notice, this list of conditions and the following disclaimer.
+  11:at90can_set_dyn_filter.c ****  * 2. Redistributions in binary form must reproduce the above copyright
+  12:at90can_set_dyn_filter.c ****  *    notice, this list of conditions and the following disclaimer in the
+  13:at90can_set_dyn_filter.c ****  *    documentation and/or other materials provided with the distribution.
+  14:at90can_set_dyn_filter.c ****  *
+  15:at90can_set_dyn_filter.c ****  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+  16:at90can_set_dyn_filter.c ****  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  17:at90can_set_dyn_filter.c ****  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  18:at90can_set_dyn_filter.c ****  * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+  19:at90can_set_dyn_filter.c ****  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  20:at90can_set_dyn_filter.c ****  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+  21:at90can_set_dyn_filter.c ****  * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+  22:at90can_set_dyn_filter.c ****  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+  23:at90can_set_dyn_filter.c ****  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+  24:at90can_set_dyn_filter.c ****  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  25:at90can_set_dyn_filter.c ****  * SUCH DAMAGE.
+  26:at90can_set_dyn_filter.c ****  *
+  27:at90can_set_dyn_filter.c ****  * $Id: at90can_set_dyn_filter.c 6837 2008-11-16 19:05:15Z fabian $
+  28:at90can_set_dyn_filter.c ****  */
+  29:at90can_set_dyn_filter.c **** // ----------------------------------------------------------------------------
+  30:at90can_set_dyn_filter.c **** 
+  31:at90can_set_dyn_filter.c **** #include "at90can_private.h"
+  32:at90can_set_dyn_filter.c **** #ifdef	SUPPORT_FOR_AT90CAN__
+  33:at90can_set_dyn_filter.c **** 
+  34:at90can_set_dyn_filter.c **** // ----------------------------------------------------------------------------
+  35:at90can_set_dyn_filter.c **** bool at90can_set_filter(uint8_t number, const can_filter_t *filter)
+  36:at90can_set_dyn_filter.c **** {
+  16               		.loc 1 36 0
+  17               		.cfi_startproc
+  18               	.LVL0:
+  19               	/* prologue: function */
+  20               	/* frame size = 0 */
+  21               	/* stack size = 0 */
+  22               	.L__stack_usage = 0
+  23 0000 FB01      		movw r30,r22
+  37:at90can_set_dyn_filter.c **** 	if (number > 14) {
+  24               		.loc 1 37 0
+  25 0002 8F30      		cpi r24,lo8(15)
+  26 0004 00F0      		brlo .+2
+  27 0006 00C0      		rjmp .L17
+  28               	.LBB7:
+  29               	.LBB8:
+  30               		.file 2 "at90can_private.h"
+   1:at90can_private.h **** // ----------------------------------------------------------------------------
+   2:at90can_private.h **** /*
+   3:at90can_private.h ****  * Copyright (c) 2007 Fabian Greif, Roboterclub Aachen e.V.
+   4:at90can_private.h ****  *  All rights reserved.
+   5:at90can_private.h ****  *
+   6:at90can_private.h ****  * Redistribution and use in source and binary forms, with or without
+   7:at90can_private.h ****  * modification, are permitted provided that the following conditions
+   8:at90can_private.h ****  * are met:
+   9:at90can_private.h ****  * 1. Redistributions of source code must retain the above copyright
+  10:at90can_private.h ****  *    notice, this list of conditions and the following disclaimer.
+  11:at90can_private.h ****  * 2. Redistributions in binary form must reproduce the above copyright
+  12:at90can_private.h ****  *    notice, this list of conditions and the following disclaimer in the
+  13:at90can_private.h ****  *    documentation and/or other materials provided with the distribution.
+  14:at90can_private.h ****  *
+  15:at90can_private.h ****  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+  16:at90can_private.h ****  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  17:at90can_private.h ****  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  18:at90can_private.h ****  * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+  19:at90can_private.h ****  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  20:at90can_private.h ****  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+  21:at90can_private.h ****  * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+  22:at90can_private.h ****  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+  23:at90can_private.h ****  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+  24:at90can_private.h ****  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  25:at90can_private.h ****  * SUCH DAMAGE.
+  26:at90can_private.h ****  *
+  27:at90can_private.h ****  * $Id: at90can_private.h 6910 2008-11-30 21:13:14Z fabian $
+  28:at90can_private.h ****  */
+  29:at90can_private.h **** // ----------------------------------------------------------------------------
+  30:at90can_private.h **** 
+  31:at90can_private.h **** #ifndef	AT90CAN_PRIVATE_H
+  32:at90can_private.h **** #define	AT90CAN_PRIVATE_H
+  33:at90can_private.h **** 
+  34:at90can_private.h **** // ----------------------------------------------------------------------------
+  35:at90can_private.h **** 
+  36:at90can_private.h **** #include <avr/io.h>
+  37:at90can_private.h **** #include <avr/interrupt.h>
+  38:at90can_private.h **** 
+  39:at90can_private.h **** #include <stdlib.h>
+  40:at90can_private.h **** 
+  41:at90can_private.h **** #include "can_private.h"
+  42:at90can_private.h **** #include "can.h"
+  43:at90can_private.h **** #include "can_buffer.h"
+  44:at90can_private.h **** #include "utils.h"
+  45:at90can_private.h **** 
+  46:at90can_private.h **** // ----------------------------------------------------------------------------
+  47:at90can_private.h **** 
+  48:at90can_private.h **** #if (defined (__AVR_AT90CAN32__) || \
+  49:at90can_private.h **** 	 defined (__AVR_AT90CAN64__) || \
+  50:at90can_private.h **** 	 defined (__AVR_AT90CAN128__)) && \
+  51:at90can_private.h **** 	 BUILD_FOR_AT90CAN == 1
+  52:at90can_private.h **** 
+  53:at90can_private.h **** #if F_CPU != 16000000UL
+  54:at90can_private.h **** 	#error	only 16 MHz for F_CPU supported!
+  55:at90can_private.h **** #endif
+  56:at90can_private.h **** 
+  57:at90can_private.h **** #define	SUPPORT_FOR_AT90CAN__		1
+  58:at90can_private.h **** 
+  59:at90can_private.h **** // ----------------------------------------------------------------------------
+  60:at90can_private.h **** 
+  61:at90can_private.h **** #if CAN_RX_BUFFER_SIZE > 0
+  62:at90can_private.h **** extern can_buffer_t can_rx_buffer;
+  63:at90can_private.h **** #else
+  64:at90can_private.h **** extern volatile uint8_t _messages_waiting;
+  65:at90can_private.h **** #endif
+  66:at90can_private.h **** 
+  67:at90can_private.h **** #if CAN_TX_BUFFER_SIZE > 0
+  68:at90can_private.h **** extern can_buffer_t can_tx_buffer;
+  69:at90can_private.h **** #else
+  70:at90can_private.h **** extern volatile uint8_t _free_buffer;
+  71:at90can_private.h **** #endif
+  72:at90can_private.h **** 
+  73:at90can_private.h **** #if CAN_FORCE_TX_ORDER
+  74:at90can_private.h **** extern volatile uint8_t _transmission_in_progress ;
+  75:at90can_private.h **** #endif
+  76:at90can_private.h **** 
+  77:at90can_private.h **** // ----------------------------------------------------------------------------
+  78:at90can_private.h **** extern uint8_t _find_free_mob(void);
+  79:at90can_private.h **** 
+  80:at90can_private.h **** // ----------------------------------------------------------------------------
+  81:at90can_private.h **** extern void _disable_mob_interrupt(uint8_t mob);
+  82:at90can_private.h **** 
+  83:at90can_private.h **** // ----------------------------------------------------------------------------
+  84:at90can_private.h **** extern void _enable_mob_interrupt(uint8_t mob);
+  85:at90can_private.h **** 
+  86:at90can_private.h **** 
+  87:at90can_private.h **** // ----------------------------------------------------------------------------
+  88:at90can_private.h **** extern uint8_t at90can_send_message(const can_t *msg);
+  89:at90can_private.h **** 
+  90:at90can_private.h **** // ----------------------------------------------------------------------------
+  91:at90can_private.h **** extern uint8_t at90can_get_message(can_t *msg);
+  92:at90can_private.h **** 
+  93:at90can_private.h **** // ----------------------------------------------------------------------------
+  94:at90can_private.h **** /**
+  95:at90can_private.h ****  * \brief	Copy data form a message in RAM to the actual registers
+  96:at90can_private.h ****  * \warning this function assumes CANPAGE to be set properly
+  97:at90can_private.h ****  */
+  98:at90can_private.h **** extern void at90can_copy_message_to_mob(const can_t *msg);
+  99:at90can_private.h **** 
+ 100:at90can_private.h **** // ----------------------------------------------------------------------------
+ 101:at90can_private.h **** /**
+ 102:at90can_private.h ****  * \brief	Copy data form a message the registers to RAM
+ 103:at90can_private.h ****  * \warning this function assumes CANPAGE to be set properly
+ 104:at90can_private.h ****  */
+ 105:at90can_private.h **** extern void at90can_copy_mob_to_message(can_t *msg);
+ 106:at90can_private.h **** 
+ 107:at90can_private.h **** // ----------------------------------------------------------------------------
+ 108:at90can_private.h **** // enter standby mode => messages are not transmitted nor received
+ 109:at90can_private.h **** 
+ 110:at90can_private.h **** extern __attribute__ ((gnu_inline)) inline void _enter_standby_mode(void)
+ 111:at90can_private.h **** {
+ 112:at90can_private.h **** 	// request abort
+ 113:at90can_private.h **** 	CANGCON = (1 << ABRQ);
+  31               		.loc 2 113 0
+  32 0008 90E8      		ldi r25,lo8(-128)
+  33 000a 9093 D800 		sts 216,r25
+  34               	.L4:
+ 114:at90can_private.h **** 	
+ 115:at90can_private.h **** 	// wait until receiver is not busy
+ 116:at90can_private.h **** 	while (CANGSTA & (1 << RXBSY))
+  35               		.loc 2 116 0
+  36 000e 9091 D900 		lds r25,217
+  37 0012 93FD      		sbrc r25,3
+  38 0014 00C0      		rjmp .L4
+ 117:at90can_private.h **** 		;
+ 118:at90can_private.h **** 	
+ 119:at90can_private.h **** 	// request standby mode
+ 120:at90can_private.h **** 	CANGCON = 0;
+  39               		.loc 2 120 0
+  40 0016 1092 D800 		sts 216,__zero_reg__
+  41               	.L6:
+ 121:at90can_private.h **** 	
+ 122:at90can_private.h **** 	// wait until the CAN Controller has entered standby mode
+ 123:at90can_private.h **** 	while (CANGSTA & (1 << ENFG))
+  42               		.loc 2 123 0
+  43 001a 9091 D900 		lds r25,217
+  44 001e 92FD      		sbrc r25,2
+  45 0020 00C0      		rjmp .L6
+  46               	.LBE8:
+  47               	.LBE7:
+  38:at90can_set_dyn_filter.c **** 		// it is only possible to serve a maximum of 15 filters
+  39:at90can_set_dyn_filter.c **** 		return false;
+  40:at90can_set_dyn_filter.c **** 	}
+  41:at90can_set_dyn_filter.c **** 	
+  42:at90can_set_dyn_filter.c **** 	// set CAN Controller to standby mode
+  43:at90can_set_dyn_filter.c **** 	_enter_standby_mode();
+  44:at90can_set_dyn_filter.c **** 	
+  45:at90can_set_dyn_filter.c **** 	CANPAGE = number << 4;
+  48               		.loc 1 45 0
+  49 0022 982F      		mov r25,r24
+  50 0024 9295      		swap r25
+  51 0026 907F      		andi r25,lo8(-16)
+  52 0028 9093 ED00 		sts 237,r25
+  46:at90can_set_dyn_filter.c **** 	
+  47:at90can_set_dyn_filter.c **** 	CANSTMOB = 0;
+  53               		.loc 1 47 0
+  54 002c 1092 EE00 		sts 238,__zero_reg__
+  48:at90can_set_dyn_filter.c **** 	CANCDMOB = 0;
+  55               		.loc 1 48 0
+  56 0030 1092 EF00 		sts 239,__zero_reg__
+  49:at90can_set_dyn_filter.c **** 	
+  50:at90can_set_dyn_filter.c **** 	#if SUPPORT_EXTENDED_CANID
+  51:at90can_set_dyn_filter.c **** 	
+  52:at90can_set_dyn_filter.c **** 	if (filter->flags.extended == 0x3)
+  57               		.loc 1 52 0
+  58 0034 9085      		ldd r25,Z+8
+  59 0036 9C70      		andi r25,lo8(12)
+  60 0038 9C30      		cpi r25,lo8(12)
+  61 003a 01F0      		breq .+2
+  62 003c 00C0      		rjmp .L7
+  53:at90can_set_dyn_filter.c **** 	{
+  54:at90can_set_dyn_filter.c **** 		// extended identifier
+  55:at90can_set_dyn_filter.c **** 		CANIDT4 = (uint8_t)  filter->id << 3;
+  63               		.loc 1 55 0
+  64 003e 9081      		ld r25,Z
+  65 0040 990F      		lsl r25
+  66 0042 990F      		lsl r25
+  67 0044 990F      		lsl r25
+  68 0046 9093 F000 		sts 240,r25
+  56:at90can_set_dyn_filter.c **** 		CANIDT3 = 			 filter->id >> 5;
+  69               		.loc 1 56 0
+  70 004a 4081      		ld r20,Z
+  71 004c 5181      		ldd r21,Z+1
+  72 004e 6281      		ldd r22,Z+2
+  73 0050 7381      		ldd r23,Z+3
+  74 0052 A5E0      		ldi r26,5
+  75               		1:
+  76 0054 7695      		lsr r23
+  77 0056 6795      		ror r22
+  78 0058 5795      		ror r21
+  79 005a 4795      		ror r20
+  80 005c AA95      		dec r26
+  81 005e 01F4      		brne 1b
+  82 0060 4093 F100 		sts 241,r20
+  57:at90can_set_dyn_filter.c **** 		CANIDT2 =            filter->id >> 13;
+  83               		.loc 1 57 0
+  84 0064 4081      		ld r20,Z
+  85 0066 5181      		ldd r21,Z+1
+  86 0068 6281      		ldd r22,Z+2
+  87 006a 7381      		ldd r23,Z+3
+  88 006c BDE0      		ldi r27,13
+  89               		1:
+  90 006e 7695      		lsr r23
+  91 0070 6795      		ror r22
+  92 0072 5795      		ror r21
+  93 0074 4795      		ror r20
+  94 0076 BA95      		dec r27
+  95 0078 01F4      		brne 1b
+  96 007a 4093 F200 		sts 242,r20
+  58:at90can_set_dyn_filter.c **** 		CANIDT1 =            filter->id >> 21;
+  97               		.loc 1 58 0
+  98 007e 4081      		ld r20,Z
+  99 0080 5181      		ldd r21,Z+1
+ 100 0082 6281      		ldd r22,Z+2
+ 101 0084 7381      		ldd r23,Z+3
+ 102 0086 95E1      		ldi r25,21
+ 103               		1:
+ 104 0088 7695      		lsr r23
+ 105 008a 6795      		ror r22
+ 106 008c 5795      		ror r21
+ 107 008e 4795      		ror r20
+ 108 0090 9A95      		dec r25
+ 109 0092 01F4      		brne 1b
+ 110 0094 4093 F300 		sts 243,r20
+  59:at90can_set_dyn_filter.c **** 		
+  60:at90can_set_dyn_filter.c **** 		CANIDM4 = ((uint8_t) filter->mask << 3) | (1 << IDEMSK);
+ 111               		.loc 1 60 0
+ 112 0098 2481      		ldd r18,Z+4
+ 113 009a 98E0      		ldi r25,lo8(8)
+ 114 009c 299F      		mul r18,r25
+ 115 009e 9001      		movw r18,r0
+ 116 00a0 1124      		clr __zero_reg__
+ 117 00a2 2160      		ori r18,lo8(1)
+ 118 00a4 2093 F400 		sts 244,r18
+  61:at90can_set_dyn_filter.c **** 		CANIDM3 = 			 filter->mask >> 5;
+ 119               		.loc 1 61 0
+ 120 00a8 4481      		ldd r20,Z+4
+ 121 00aa 5581      		ldd r21,Z+5
+ 122 00ac 6681      		ldd r22,Z+6
+ 123 00ae 7781      		ldd r23,Z+7
+ 124 00b0 25E0      		ldi r18,5
+ 125               		1:
+ 126 00b2 7695      		lsr r23
+ 127 00b4 6795      		ror r22
+ 128 00b6 5795      		ror r21
+ 129 00b8 4795      		ror r20
+ 130 00ba 2A95      		dec r18
+ 131 00bc 01F4      		brne 1b
+ 132 00be 4093 F500 		sts 245,r20
+  62:at90can_set_dyn_filter.c **** 		CANIDM2 =            filter->mask >> 13;
+ 133               		.loc 1 62 0
+ 134 00c2 4481      		ldd r20,Z+4
+ 135 00c4 5581      		ldd r21,Z+5
+ 136 00c6 6681      		ldd r22,Z+6
+ 137 00c8 7781      		ldd r23,Z+7
+ 138 00ca 3DE0      		ldi r19,13
+ 139               		1:
+ 140 00cc 7695      		lsr r23
+ 141 00ce 6795      		ror r22
+ 142 00d0 5795      		ror r21
+ 143 00d2 4795      		ror r20
+ 144 00d4 3A95      		dec r19
+ 145 00d6 01F4      		brne 1b
+ 146 00d8 4093 F600 		sts 246,r20
+  63:at90can_set_dyn_filter.c **** 		CANIDM1 =            filter->mask >> 21;
+ 147               		.loc 1 63 0
+ 148 00dc 4481      		ldd r20,Z+4
+ 149 00de 5581      		ldd r21,Z+5
+ 150 00e0 6681      		ldd r22,Z+6
+ 151 00e2 7781      		ldd r23,Z+7
+ 152 00e4 A5E1      		ldi r26,21
+ 153               		1:
+ 154 00e6 7695      		lsr r23
+ 155 00e8 6795      		ror r22
+ 156 00ea 5795      		ror r21
+ 157 00ec 4795      		ror r20
+ 158 00ee AA95      		dec r26
+ 159 00f0 01F4      		brne 1b
+ 160 00f2 4093 F700 		sts 247,r20
+  64:at90can_set_dyn_filter.c **** 		
+  65:at90can_set_dyn_filter.c **** 		CANCDMOB |= (1 << IDE);
+ 161               		.loc 1 65 0
+ 162 00f6 9091 EF00 		lds r25,239
+ 163 00fa 9061      		ori r25,lo8(16)
+ 164 00fc 9093 EF00 		sts 239,r25
+ 165 0100 00C0      		rjmp .L8
+ 166               	.L7:
+  66:at90can_set_dyn_filter.c **** 	}
+  67:at90can_set_dyn_filter.c **** 	else {
+  68:at90can_set_dyn_filter.c **** 		CANIDT4 = 0;
+ 167               		.loc 1 68 0
+ 168 0102 1092 F000 		sts 240,__zero_reg__
+  69:at90can_set_dyn_filter.c **** 		CANIDT3 = 0;
+ 169               		.loc 1 69 0
+ 170 0106 1092 F100 		sts 241,__zero_reg__
+  70:at90can_set_dyn_filter.c **** 		CANIDT2 = (uint8_t)  filter->id << 5;
+ 171               		.loc 1 70 0
+ 172 010a 9081      		ld r25,Z
+ 173 010c 9295      		swap r25
+ 174 010e 990F      		lsl r25
+ 175 0110 907E      		andi r25,lo8(-32)
+ 176 0112 9093 F200 		sts 242,r25
+  71:at90can_set_dyn_filter.c **** 		CANIDT1 = (uint16_t) filter->id >> 3;
+ 177               		.loc 1 71 0
+ 178 0116 2081      		ld r18,Z
+ 179 0118 3181      		ldd r19,Z+1
+ 180 011a 43E0      		ldi r20,3
+ 181               		1:
+ 182 011c 3695      		lsr r19
+ 183 011e 2795      		ror r18
+ 184 0120 4A95      		dec r20
+ 185 0122 01F4      		brne 1b
+ 186 0124 2093 F300 		sts 243,r18
+  72:at90can_set_dyn_filter.c **** 		
+  73:at90can_set_dyn_filter.c **** 		if (filter->flags.extended) {
+ 187               		.loc 1 73 0
+ 188 0128 9085      		ldd r25,Z+8
+ 189 012a 9C70      		andi r25,lo8(12)
+ 190 012c 01F0      		breq .L9
+  74:at90can_set_dyn_filter.c **** 			CANIDM4 = (1 << IDEMSK);		// receive only standard frames
+ 191               		.loc 1 74 0
+ 192 012e 91E0      		ldi r25,lo8(1)
+ 193 0130 9093 F400 		sts 244,r25
+ 194 0134 00C0      		rjmp .L10
+ 195               	.L9:
+  75:at90can_set_dyn_filter.c **** 		} else {
+  76:at90can_set_dyn_filter.c **** 			CANIDM4 = 0;					// receive all frames
+ 196               		.loc 1 76 0
+ 197 0136 1092 F400 		sts 244,__zero_reg__
+ 198               	.L10:
+  77:at90can_set_dyn_filter.c **** 		}
+  78:at90can_set_dyn_filter.c **** 		
+  79:at90can_set_dyn_filter.c **** 		CANIDM3 = 0;
+ 199               		.loc 1 79 0
+ 200 013a 1092 F500 		sts 245,__zero_reg__
+  80:at90can_set_dyn_filter.c **** 		CANIDM2 = (uint8_t)  filter->mask << 5;
+ 201               		.loc 1 80 0
+ 202 013e 9481      		ldd r25,Z+4
+ 203 0140 9295      		swap r25
+ 204 0142 990F      		lsl r25
+ 205 0144 907E      		andi r25,lo8(-32)
+ 206 0146 9093 F600 		sts 246,r25
+  81:at90can_set_dyn_filter.c **** 		CANIDM1 = (uint16_t) filter->mask >> 3;
+ 207               		.loc 1 81 0
+ 208 014a 2481      		ldd r18,Z+4
+ 209 014c 3581      		ldd r19,Z+5
+ 210 014e 93E0      		ldi r25,3
+ 211               		1:
+ 212 0150 3695      		lsr r19
+ 213 0152 2795      		ror r18
+ 214 0154 9A95      		dec r25
+ 215 0156 01F4      		brne 1b
+ 216 0158 2093 F700 		sts 247,r18
+ 217               	.L8:
+  82:at90can_set_dyn_filter.c **** 	}
+  83:at90can_set_dyn_filter.c **** 	
+  84:at90can_set_dyn_filter.c **** 	#else
+  85:at90can_set_dyn_filter.c **** 	
+  86:at90can_set_dyn_filter.c **** 	CANIDT4 = 0;
+  87:at90can_set_dyn_filter.c **** 	CANIDT3 = 0;
+  88:at90can_set_dyn_filter.c **** 	CANIDT2 = (uint8_t)  filter->id << 5;
+  89:at90can_set_dyn_filter.c **** 	CANIDT1 = (uint16_t) filter->id >> 3;
+  90:at90can_set_dyn_filter.c **** 	
+  91:at90can_set_dyn_filter.c **** 	CANIDM4 = (1 << IDEMSK);
+  92:at90can_set_dyn_filter.c **** 	CANIDM3 = 0;
+  93:at90can_set_dyn_filter.c **** 	CANIDM2 = (uint8_t)  filter->mask << 5;
+  94:at90can_set_dyn_filter.c **** 	CANIDM1 = (uint16_t) filter->mask >> 3;
+  95:at90can_set_dyn_filter.c **** 	
+  96:at90can_set_dyn_filter.c **** 	#endif
+  97:at90can_set_dyn_filter.c **** 	
+  98:at90can_set_dyn_filter.c **** 	if (filter->flags.rtr & 0x2) {
+ 218               		.loc 1 98 0
+ 219 015c 9085      		ldd r25,Z+8
+ 220 015e 91FF      		sbrs r25,1
+ 221 0160 00C0      		rjmp .L12
+  99:at90can_set_dyn_filter.c **** 		CANIDM4 |= (1 << RTRMSK);
+ 222               		.loc 1 99 0
+ 223 0162 9091 F400 		lds r25,244
+ 224 0166 9460      		ori r25,lo8(4)
+ 225 0168 9093 F400 		sts 244,r25
+ 100:at90can_set_dyn_filter.c **** 		
+ 101:at90can_set_dyn_filter.c **** 		if (filter->flags.rtr & 0x1)
+ 226               		.loc 1 101 0
+ 227 016c 9085      		ldd r25,Z+8
+ 228 016e 90FF      		sbrs r25,0
+ 229 0170 00C0      		rjmp .L12
+ 102:at90can_set_dyn_filter.c **** 			CANIDT4 |= (1 << RTRMSK);		// only RTR-frames
+ 230               		.loc 1 102 0
+ 231 0172 9091 F000 		lds r25,240
+ 232 0176 9460      		ori r25,lo8(4)
+ 233 0178 9093 F000 		sts 240,r25
+ 234               	.L12:
+ 103:at90can_set_dyn_filter.c **** 	}
+ 104:at90can_set_dyn_filter.c **** 	
+ 105:at90can_set_dyn_filter.c **** 	CANCDMOB |= (1<<CONMOB1);
+ 235               		.loc 1 105 0
+ 236 017c 9091 EF00 		lds r25,239
+ 237 0180 9068      		ori r25,lo8(-128)
+ 238 0182 9093 EF00 		sts 239,r25
+ 106:at90can_set_dyn_filter.c **** 	
+ 107:at90can_set_dyn_filter.c **** 	_enable_mob_interrupt(number);
+ 239               		.loc 1 107 0
+ 240 0186 0E94 0000 		call _enable_mob_interrupt
+ 241               	.LVL1:
+ 242               	.LBB9:
+ 243               	.LBB10:
+ 124:at90can_private.h **** 		;
+ 125:at90can_private.h **** }
+ 126:at90can_private.h **** 
+ 127:at90can_private.h **** // ----------------------------------------------------------------------------
+ 128:at90can_private.h **** // leave standby mode => CAN Controller is connected to CAN Bus
+ 129:at90can_private.h **** 
+ 130:at90can_private.h **** extern __attribute__ ((gnu_inline)) inline void _leave_standby_mode(void)
+ 131:at90can_private.h **** {
+ 132:at90can_private.h **** 	// save CANPAGE register
+ 133:at90can_private.h **** 	uint8_t canpage = CANPAGE;
+ 244               		.loc 2 133 0
+ 245 018a 9091 ED00 		lds r25,237
+ 246               	.LVL2:
+ 247               	.LBB11:
+ 134:at90can_private.h **** 	
+ 135:at90can_private.h **** 	// reenable all MObs
+ 136:at90can_private.h **** 	for (uint8_t i=0;i<15;i++) {
+ 248               		.loc 2 136 0
+ 249 018e 80E0      		ldi r24,0
+ 250               	.LVL3:
+ 251               	.L15:
+ 137:at90can_private.h **** 		CANPAGE = i << 4;
+ 252               		.loc 2 137 0
+ 253 0190 282F      		mov r18,r24
+ 254 0192 2295      		swap r18
+ 255 0194 207F      		andi r18,lo8(-16)
+ 256 0196 2093 ED00 		sts 237,r18
+ 138:at90can_private.h **** 		CANCDMOB = CANCDMOB;
+ 257               		.loc 2 138 0
+ 258 019a 2091 EF00 		lds r18,239
+ 259 019e 2093 EF00 		sts 239,r18
+ 136:at90can_private.h **** 	for (uint8_t i=0;i<15;i++) {
+ 260               		.loc 2 136 0
+ 261 01a2 8F5F      		subi r24,lo8(-(1))
+ 262               	.LVL4:
+ 263 01a4 8F30      		cpi r24,lo8(15)
+ 264 01a6 01F4      		brne .L15
+ 265               	.LBE11:
+ 139:at90can_private.h **** 	}
+ 140:at90can_private.h **** 	
+ 141:at90can_private.h **** 	// restore CANPAGE
+ 142:at90can_private.h **** 	CANPAGE = canpage;
+ 266               		.loc 2 142 0
+ 267 01a8 9093 ED00 		sts 237,r25
+ 143:at90can_private.h **** 	
+ 144:at90can_private.h **** 	// request normal mode
+ 145:at90can_private.h **** 	CANGCON = (1 << ENASTB);
+ 268               		.loc 2 145 0
+ 269 01ac 82E0      		ldi r24,lo8(2)
+ 270               	.LVL5:
+ 271 01ae 8093 D800 		sts 216,r24
+ 272               	.L16:
+ 146:at90can_private.h **** 	
+ 147:at90can_private.h **** 	// wait until the CAN Controller has left standby mode
+ 148:at90can_private.h **** 	while ((CANGSTA & (1 << ENFG)) == 0)
+ 273               		.loc 2 148 0
+ 274 01b2 8091 D900 		lds r24,217
+ 275 01b6 82FF      		sbrs r24,2
+ 276 01b8 00C0      		rjmp .L16
+ 277 01ba 00C0      		rjmp .L23
+ 278               	.LVL6:
+ 279               	.L17:
+ 280               	.LBE10:
+ 281               	.LBE9:
+  39:at90can_set_dyn_filter.c **** 		return false;
+ 282               		.loc 1 39 0
+ 283 01bc 80E0      		ldi r24,0
+ 284               	.LVL7:
+ 285 01be 0895      		ret
+ 286               	.LVL8:
+ 287               	.L23:
+ 108:at90can_set_dyn_filter.c **** 	
+ 109:at90can_set_dyn_filter.c **** 	// re-enable CAN Controller 
+ 110:at90can_set_dyn_filter.c **** 	_leave_standby_mode();
+ 111:at90can_set_dyn_filter.c **** 	
+ 112:at90can_set_dyn_filter.c **** 	return true;
+ 288               		.loc 1 112 0
+ 289 01c0 81E0      		ldi r24,lo8(1)
+ 113:at90can_set_dyn_filter.c **** }
+ 290               		.loc 1 113 0
+ 291 01c2 0895      		ret
+ 292               		.cfi_endproc
+ 293               	.LFE18:
+ 295               	.Letext0:
+ 296               		.file 3 "/usr/lib/avr/include/stdint.h"
+ 297               		.file 4 "../can.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 at90can_set_dyn_filter.c
+     /tmp/ccKcm4NU.s:2      *ABS*:0000003e __SP_H__
+     /tmp/ccKcm4NU.s:3      *ABS*:0000003d __SP_L__
+     /tmp/ccKcm4NU.s:4      *ABS*:0000003f __SREG__
+     /tmp/ccKcm4NU.s:5      *ABS*:0000003b __RAMPZ__
+     /tmp/ccKcm4NU.s:6      *ABS*:00000000 __tmp_reg__
+     /tmp/ccKcm4NU.s:7      *ABS*:00000001 __zero_reg__
+     /tmp/ccKcm4NU.s:13     .text:00000000 can_set_filter
+
+UNDEFINED SYMBOLS
+_enable_mob_interrupt

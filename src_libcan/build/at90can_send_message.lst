@@ -1,0 +1,468 @@
+   1               		.file	"at90can_send_message.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__RAMPZ__ = 0x3b
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+  10               		.cfi_sections	.debug_frame
+  11               	.global	at90can_copy_message_to_mob
+  13               	at90can_copy_message_to_mob:
+  14               	.LFB18:
+  15               		.file 1 "at90can_send_message.c"
+   1:at90can_send_message.c **** // ----------------------------------------------------------------------------
+   2:at90can_send_message.c **** /*
+   3:at90can_send_message.c ****  * Copyright (c) 2007 Fabian Greif, Roboterclub Aachen e.V.
+   4:at90can_send_message.c ****  *  All rights reserved.
+   5:at90can_send_message.c ****  *
+   6:at90can_send_message.c ****  * Redistribution and use in source and binary forms, with or without
+   7:at90can_send_message.c ****  * modification, are permitted provided that the following conditions
+   8:at90can_send_message.c ****  * are met:
+   9:at90can_send_message.c ****  * 1. Redistributions of source code must retain the above copyright
+  10:at90can_send_message.c ****  *    notice, this list of conditions and the following disclaimer.
+  11:at90can_send_message.c ****  * 2. Redistributions in binary form must reproduce the above copyright
+  12:at90can_send_message.c ****  *    notice, this list of conditions and the following disclaimer in the
+  13:at90can_send_message.c ****  *    documentation and/or other materials provided with the distribution.
+  14:at90can_send_message.c ****  *
+  15:at90can_send_message.c ****  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+  16:at90can_send_message.c ****  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  17:at90can_send_message.c ****  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  18:at90can_send_message.c ****  * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+  19:at90can_send_message.c ****  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  20:at90can_send_message.c ****  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+  21:at90can_send_message.c ****  * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+  22:at90can_send_message.c ****  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+  23:at90can_send_message.c ****  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+  24:at90can_send_message.c ****  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  25:at90can_send_message.c ****  * SUCH DAMAGE.
+  26:at90can_send_message.c ****  *
+  27:at90can_send_message.c ****  * $Id: at90can_send_message.c 6837 2008-11-16 19:05:15Z fabian $
+  28:at90can_send_message.c ****  */
+  29:at90can_send_message.c **** // ----------------------------------------------------------------------------
+  30:at90can_send_message.c **** 
+  31:at90can_send_message.c **** #include "at90can_private.h"
+  32:at90can_send_message.c **** #ifdef	SUPPORT_FOR_AT90CAN__
+  33:at90can_send_message.c **** 
+  34:at90can_send_message.c **** #include <string.h>
+  35:at90can_send_message.c **** 
+  36:at90can_send_message.c **** // ----------------------------------------------------------------------------
+  37:at90can_send_message.c **** /**
+  38:at90can_send_message.c ****  * \brief	Copy data form a message in RAM to the actual registers
+  39:at90can_send_message.c ****  * 
+  40:at90can_send_message.c ****  * \warning this function assumes CANPAGE to be set properly before the call
+  41:at90can_send_message.c ****  */
+  42:at90can_send_message.c **** void at90can_copy_message_to_mob(const can_t *msg)
+  43:at90can_send_message.c **** {
+  16               		.loc 1 43 0
+  17               		.cfi_startproc
+  18               	.LVL0:
+  19 0000 CF93      		push r28
+  20               	.LCFI0:
+  21               		.cfi_def_cfa_offset 3
+  22               		.cfi_offset 28, -2
+  23 0002 DF93      		push r29
+  24               	.LCFI1:
+  25               		.cfi_def_cfa_offset 4
+  26               		.cfi_offset 29, -3
+  27 0004 00D0      		rcall .
+  28 0006 00D0      		rcall .
+  29               	.LCFI2:
+  30               		.cfi_def_cfa_offset 8
+  31 0008 CDB7      		in r28,__SP_L__
+  32 000a DEB7      		in r29,__SP_H__
+  33               	.LCFI3:
+  34               		.cfi_def_cfa_register 28
+  35               	/* prologue: function */
+  36               	/* frame size = 4 */
+  37               	/* stack size = 6 */
+  38               	.L__stack_usage = 6
+  39 000c FC01      		movw r30,r24
+  44:at90can_send_message.c **** 	// write DLC (Data Length Code)
+  45:at90can_send_message.c **** 	CANCDMOB = msg->length;
+  40               		.loc 1 45 0
+  41 000e 8581      		ldd r24,Z+5
+  42               	.LVL1:
+  43 0010 8093 EF00 		sts 239,r24
+  46:at90can_send_message.c **** 	
+  47:at90can_send_message.c **** 	#if SUPPORT_EXTENDED_CANID
+  48:at90can_send_message.c **** 	
+  49:at90can_send_message.c **** 	if (msg->flags.extended) {
+  44               		.loc 1 49 0
+  45 0014 8481      		ldd r24,Z+4
+  46 0016 81FF      		sbrs r24,1
+  47 0018 00C0      		rjmp .L2
+  48               	.LBB7:
+  50:at90can_send_message.c **** 		// extended CAN ID
+  51:at90can_send_message.c **** 		CANCDMOB |= (1 << IDE);
+  49               		.loc 1 51 0
+  50 001a 8091 EF00 		lds r24,239
+  51 001e 8061      		ori r24,lo8(16)
+  52 0020 8093 EF00 		sts 239,r24
+  52:at90can_send_message.c **** 		
+  53:at90can_send_message.c **** 		CANIDT4 = (uint8_t)  msg->id << 3;
+  53               		.loc 1 53 0
+  54 0024 8081      		ld r24,Z
+  55 0026 880F      		lsl r24
+  56 0028 880F      		lsl r24
+  57 002a 880F      		lsl r24
+  58 002c 8093 F000 		sts 240,r24
+  54:at90can_send_message.c **** 		
+  55:at90can_send_message.c **** 		uint32_t temp = msg->id << 3;
+  59               		.loc 1 55 0
+  60 0030 4081      		ld r20,Z
+  61 0032 5181      		ldd r21,Z+1
+  62 0034 6281      		ldd r22,Z+2
+  63 0036 7381      		ldd r23,Z+3
+  64 0038 33E0      		ldi r19,3
+  65               		1:
+  66 003a 440F      		lsl r20
+  67 003c 551F      		rol r21
+  68 003e 661F      		rol r22
+  69 0040 771F      		rol r23
+  70 0042 3A95      		dec r19
+  71 0044 01F4      		brne 1b
+  72 0046 4983      		std Y+1,r20
+  73 0048 5A83      		std Y+2,r21
+  74 004a 6B83      		std Y+3,r22
+  75 004c 7C83      		std Y+4,r23
+  76               	.LVL2:
+  56:at90can_send_message.c **** 		uint8_t *ptr = (uint8_t *) &temp;
+  57:at90can_send_message.c **** 		
+  58:at90can_send_message.c **** 		CANIDT3 = *(ptr + 1);
+  77               		.loc 1 58 0
+  78 004e 8A81      		ldd r24,Y+2
+  79 0050 8093 F100 		sts 241,r24
+  59:at90can_send_message.c **** 		CANIDT2 = *(ptr + 2);
+  80               		.loc 1 59 0
+  81 0054 8B81      		ldd r24,Y+3
+  82 0056 8093 F200 		sts 242,r24
+  60:at90can_send_message.c **** 		CANIDT1 = *(ptr + 3);
+  83               		.loc 1 60 0
+  84 005a 8C81      		ldd r24,Y+4
+  85 005c 00C0      		rjmp .L8
+  86               	.LVL3:
+  87               	.L2:
+  88               	.LBE7:
+  61:at90can_send_message.c **** 	}
+  62:at90can_send_message.c **** 	else {
+  63:at90can_send_message.c **** 		// standard CAN ID
+  64:at90can_send_message.c **** 		CANIDT4 = 0;
+  89               		.loc 1 64 0
+  90 005e 1092 F000 		sts 240,__zero_reg__
+  65:at90can_send_message.c **** 		CANIDT3 = 0;
+  91               		.loc 1 65 0
+  92 0062 1092 F100 		sts 241,__zero_reg__
+  66:at90can_send_message.c **** 		CANIDT2 = (uint8_t)  msg->id << 5;
+  93               		.loc 1 66 0
+  94 0066 8081      		ld r24,Z
+  95 0068 8295      		swap r24
+  96 006a 880F      		lsl r24
+  97 006c 807E      		andi r24,lo8(-32)
+  98 006e 8093 F200 		sts 242,r24
+  67:at90can_send_message.c **** 		CANIDT1 = (uint16_t) msg->id >> 3;
+  99               		.loc 1 67 0
+ 100 0072 8081      		ld r24,Z
+ 101 0074 9181      		ldd r25,Z+1
+ 102 0076 23E0      		ldi r18,3
+ 103               		1:
+ 104 0078 9695      		lsr r25
+ 105 007a 8795      		ror r24
+ 106 007c 2A95      		dec r18
+ 107 007e 01F4      		brne 1b
+ 108               	.L8:
+ 109 0080 8093 F300 		sts 243,r24
+  68:at90can_send_message.c **** 	}
+  69:at90can_send_message.c **** 	
+  70:at90can_send_message.c **** 	#else
+  71:at90can_send_message.c **** 	
+  72:at90can_send_message.c **** 	CANIDT4 = 0;
+  73:at90can_send_message.c **** 	CANIDT3 = 0;
+  74:at90can_send_message.c **** 	CANIDT2 = (uint8_t)  msg->id << 5;
+  75:at90can_send_message.c **** 	CANIDT1 = (uint16_t) msg->id >> 3;
+  76:at90can_send_message.c **** 	
+  77:at90can_send_message.c **** 	#endif
+  78:at90can_send_message.c **** 	
+  79:at90can_send_message.c **** 	if (msg->flags.rtr) {
+ 110               		.loc 1 79 0
+ 111 0084 8481      		ldd r24,Z+4
+ 112 0086 80FF      		sbrs r24,0
+ 113 0088 00C0      		rjmp .L4
+  80:at90can_send_message.c **** 		CANIDT4 |= (1<<RTRTAG);
+ 114               		.loc 1 80 0
+ 115 008a 8091 F000 		lds r24,240
+ 116 008e 8460      		ori r24,lo8(4)
+ 117 0090 8093 F000 		sts 240,r24
+ 118 0094 00C0      		rjmp .L1
+ 119               	.L4:
+ 120               	.LVL4:
+ 121               	.LBB8:
+  81:at90can_send_message.c **** 	}
+  82:at90can_send_message.c **** 	else {
+  83:at90can_send_message.c **** 		const uint8_t *p = msg->data;
+ 122               		.loc 1 83 0
+ 123 0096 CF01      		movw r24,r30
+ 124 0098 0696      		adiw r24,6
+ 125               	.LVL5:
+ 126               	.LBB9:
+  84:at90can_send_message.c **** 		for (uint8_t i = 0;i < msg->length;i++) {
+ 127               		.loc 1 84 0
+ 128 009a DC01      		movw r26,r24
+ 129               	.LVL6:
+ 130               	.L6:
+ 131               		.loc 1 84 0 is_stmt 0 discriminator 1
+ 132 009c 2581      		ldd r18,Z+5
+ 133 009e 3A2F      		mov r19,r26
+ 134 00a0 381B      		sub r19,r24
+ 135 00a2 3217      		cp r19,r18
+ 136 00a4 00F4      		brsh .L1
+ 137               	.LVL7:
+  85:at90can_send_message.c **** 			CANMSG = *p++;
+ 138               		.loc 1 85 0 is_stmt 1 discriminator 2
+ 139 00a6 2D91      		ld r18,X+
+ 140               	.LVL8:
+ 141 00a8 2093 FA00 		sts 250,r18
+ 142               	.LVL9:
+ 143 00ac 00C0      		rjmp .L6
+ 144               	.LVL10:
+ 145               	.L1:
+ 146               	/* epilogue start */
+ 147               	.LBE9:
+ 148               	.LBE8:
+  86:at90can_send_message.c **** 		}
+  87:at90can_send_message.c **** 	}
+  88:at90can_send_message.c **** }
+ 149               		.loc 1 88 0
+ 150 00ae 0F90      		pop __tmp_reg__
+ 151 00b0 0F90      		pop __tmp_reg__
+ 152 00b2 0F90      		pop __tmp_reg__
+ 153 00b4 0F90      		pop __tmp_reg__
+ 154 00b6 DF91      		pop r29
+ 155 00b8 CF91      		pop r28
+ 156 00ba 0895      		ret
+ 157               		.cfi_endproc
+ 158               	.LFE18:
+ 160               	.global	can_send_message
+ 162               	can_send_message:
+ 163               	.LFB19:
+  89:at90can_send_message.c **** 
+  90:at90can_send_message.c **** // ----------------------------------------------------------------------------
+  91:at90can_send_message.c **** uint8_t at90can_send_message(const can_t *msg)
+  92:at90can_send_message.c **** {
+ 164               		.loc 1 92 0
+ 165               		.cfi_startproc
+ 166               	.LVL11:
+ 167 00bc 1F93      		push r17
+ 168               	.LCFI4:
+ 169               		.cfi_def_cfa_offset 3
+ 170               		.cfi_offset 17, -2
+ 171 00be CF93      		push r28
+ 172               	.LCFI5:
+ 173               		.cfi_def_cfa_offset 4
+ 174               		.cfi_offset 28, -3
+ 175 00c0 DF93      		push r29
+ 176               	.LCFI6:
+ 177               		.cfi_def_cfa_offset 5
+ 178               		.cfi_offset 29, -4
+ 179               	/* prologue: function */
+ 180               	/* frame size = 0 */
+ 181               	/* stack size = 3 */
+ 182               	.L__stack_usage = 3
+ 183 00c2 EC01      		movw r28,r24
+  93:at90can_send_message.c **** 	// check if there is any free MOb
+  94:at90can_send_message.c **** 	uint8_t mob = _find_free_mob();
+ 184               		.loc 1 94 0
+ 185 00c4 0E94 0000 		call _find_free_mob
+ 186               	.LVL12:
+ 187 00c8 182F      		mov r17,r24
+ 188               	.LVL13:
+  95:at90can_send_message.c **** 	if (mob >= 15)
+ 189               		.loc 1 95 0
+ 190 00ca 8F30      		cpi r24,lo8(15)
+ 191 00cc 00F4      		brsh .L12
+  96:at90can_send_message.c **** 		return 0;
+  97:at90can_send_message.c **** 	
+  98:at90can_send_message.c **** 	// load corresponding MOb page ...
+  99:at90can_send_message.c **** 	CANPAGE = (mob << 4);
+ 192               		.loc 1 99 0
+ 193 00ce 8295      		swap r24
+ 194 00d0 807F      		andi r24,lo8(-16)
+ 195 00d2 8093 ED00 		sts 237,r24
+ 100:at90can_send_message.c **** 	
+ 101:at90can_send_message.c **** 	// clear flags
+ 102:at90can_send_message.c **** 	CANSTMOB &= 0;
+ 196               		.loc 1 102 0
+ 197 00d6 8091 EE00 		lds r24,238
+ 198 00da 1092 EE00 		sts 238,__zero_reg__
+ 103:at90can_send_message.c **** 	
+ 104:at90can_send_message.c **** 	// ... and copy the data
+ 105:at90can_send_message.c **** 	at90can_copy_message_to_mob( msg );
+ 199               		.loc 1 105 0
+ 200 00de CE01      		movw r24,r28
+ 201 00e0 0E94 0000 		call at90can_copy_message_to_mob
+ 202               	.LVL14:
+ 106:at90can_send_message.c **** 	
+ 107:at90can_send_message.c **** 	// enable interrupt
+ 108:at90can_send_message.c **** 	_enable_mob_interrupt(mob);
+ 203               		.loc 1 108 0
+ 204 00e4 812F      		mov r24,r17
+ 205 00e6 0E94 0000 		call _enable_mob_interrupt
+ 206               	.LVL15:
+ 207               	.LBB10:
+ 109:at90can_send_message.c **** 	
+ 110:at90can_send_message.c **** 	ENTER_CRITICAL_SECTION;
+ 208               		.loc 1 110 0
+ 209 00ea 9FB7      		in r25,__SREG__
+ 210               	.LVL16:
+ 211               	.LBB11:
+ 212               	.LBB12:
+ 213               		.file 2 "/usr/lib/avr/include/util/atomic.h"
+   1:/usr/lib/avr/include/util/atomic.h **** /* Copyright (c) 2007 Dean Camera
+   2:/usr/lib/avr/include/util/atomic.h ****    All rights reserved.
+   3:/usr/lib/avr/include/util/atomic.h **** 
+   4:/usr/lib/avr/include/util/atomic.h ****    Redistribution and use in source and binary forms, with or without
+   5:/usr/lib/avr/include/util/atomic.h ****    modification, are permitted provided that the following conditions are met:
+   6:/usr/lib/avr/include/util/atomic.h **** 
+   7:/usr/lib/avr/include/util/atomic.h ****    * Redistributions of source code must retain the above copyright
+   8:/usr/lib/avr/include/util/atomic.h ****      notice, this list of conditions and the following disclaimer.
+   9:/usr/lib/avr/include/util/atomic.h **** 
+  10:/usr/lib/avr/include/util/atomic.h ****    * Redistributions in binary form must reproduce the above copyright
+  11:/usr/lib/avr/include/util/atomic.h ****      notice, this list of conditions and the following disclaimer in
+  12:/usr/lib/avr/include/util/atomic.h ****      the documentation and/or other materials provided with the
+  13:/usr/lib/avr/include/util/atomic.h ****      distribution.
+  14:/usr/lib/avr/include/util/atomic.h **** 
+  15:/usr/lib/avr/include/util/atomic.h ****    * Neither the name of the copyright holders nor the names of
+  16:/usr/lib/avr/include/util/atomic.h ****      contributors may be used to endorse or promote products derived
+  17:/usr/lib/avr/include/util/atomic.h ****      from this software without specific prior written permission.
+  18:/usr/lib/avr/include/util/atomic.h **** 
+  19:/usr/lib/avr/include/util/atomic.h ****   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  20:/usr/lib/avr/include/util/atomic.h ****   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  21:/usr/lib/avr/include/util/atomic.h ****   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  22:/usr/lib/avr/include/util/atomic.h ****   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  23:/usr/lib/avr/include/util/atomic.h ****   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  24:/usr/lib/avr/include/util/atomic.h ****   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  25:/usr/lib/avr/include/util/atomic.h ****   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  26:/usr/lib/avr/include/util/atomic.h ****   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  27:/usr/lib/avr/include/util/atomic.h ****   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  28:/usr/lib/avr/include/util/atomic.h ****   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  29:/usr/lib/avr/include/util/atomic.h ****   POSSIBILITY OF SUCH DAMAGE.
+  30:/usr/lib/avr/include/util/atomic.h **** */
+  31:/usr/lib/avr/include/util/atomic.h **** 
+  32:/usr/lib/avr/include/util/atomic.h **** /* $Id: atomic.h 2158 2010-06-10 15:48:28Z joerg_wunsch $ */
+  33:/usr/lib/avr/include/util/atomic.h **** 
+  34:/usr/lib/avr/include/util/atomic.h **** #ifndef _UTIL_ATOMIC_H_
+  35:/usr/lib/avr/include/util/atomic.h **** #define _UTIL_ATOMIC_H_ 1
+  36:/usr/lib/avr/include/util/atomic.h **** 
+  37:/usr/lib/avr/include/util/atomic.h **** #include <avr/io.h>
+  38:/usr/lib/avr/include/util/atomic.h **** #include <avr/interrupt.h>
+  39:/usr/lib/avr/include/util/atomic.h **** 
+  40:/usr/lib/avr/include/util/atomic.h **** #if !defined(__DOXYGEN__)
+  41:/usr/lib/avr/include/util/atomic.h **** /* Internal helper functions. */
+  42:/usr/lib/avr/include/util/atomic.h **** static __inline__ uint8_t __iSeiRetVal(void)
+  43:/usr/lib/avr/include/util/atomic.h **** {
+  44:/usr/lib/avr/include/util/atomic.h ****     sei();
+  45:/usr/lib/avr/include/util/atomic.h ****     return 1;
+  46:/usr/lib/avr/include/util/atomic.h **** }
+  47:/usr/lib/avr/include/util/atomic.h **** 
+  48:/usr/lib/avr/include/util/atomic.h **** static __inline__ uint8_t __iCliRetVal(void)
+  49:/usr/lib/avr/include/util/atomic.h **** {
+  50:/usr/lib/avr/include/util/atomic.h ****     cli();
+ 214               		.loc 2 50 0
+ 215               	/* #APP */
+ 216               	 ;  50 "/usr/lib/avr/include/util/atomic.h" 1
+ 217 00ec F894      		cli
+ 218               	 ;  0 "" 2
+ 219               	.LVL17:
+ 220               	/* #NOAPP */
+ 221               	.LBE12:
+ 222               	.LBE11:
+ 111:at90can_send_message.c **** 	#if CAN_TX_BUFFER_SIZE == 0
+ 112:at90can_send_message.c **** 		_free_buffer--;
+ 223               		.loc 1 112 0
+ 224 00ee 8091 0000 		lds r24,_free_buffer
+ 225 00f2 8150      		subi r24,lo8(-(-1))
+ 226 00f4 8093 0000 		sts _free_buffer,r24
+ 227               	.LVL18:
+ 228               	.LBB13:
+ 229               	.LBB14:
+  51:/usr/lib/avr/include/util/atomic.h ****     return 1;
+  52:/usr/lib/avr/include/util/atomic.h **** }
+  53:/usr/lib/avr/include/util/atomic.h **** 
+  54:/usr/lib/avr/include/util/atomic.h **** static __inline__ void __iSeiParam(const uint8_t *__s)
+  55:/usr/lib/avr/include/util/atomic.h **** {
+  56:/usr/lib/avr/include/util/atomic.h ****     sei();
+  57:/usr/lib/avr/include/util/atomic.h ****     __asm__ volatile ("" ::: "memory");
+  58:/usr/lib/avr/include/util/atomic.h ****     (void)__s;
+  59:/usr/lib/avr/include/util/atomic.h **** }
+  60:/usr/lib/avr/include/util/atomic.h **** 
+  61:/usr/lib/avr/include/util/atomic.h **** static __inline__ void __iCliParam(const uint8_t *__s)
+  62:/usr/lib/avr/include/util/atomic.h **** {
+  63:/usr/lib/avr/include/util/atomic.h ****     cli();
+  64:/usr/lib/avr/include/util/atomic.h ****     __asm__ volatile ("" ::: "memory");
+  65:/usr/lib/avr/include/util/atomic.h ****     (void)__s;
+  66:/usr/lib/avr/include/util/atomic.h **** }
+  67:/usr/lib/avr/include/util/atomic.h **** 
+  68:/usr/lib/avr/include/util/atomic.h **** static __inline__ void __iRestore(const  uint8_t *__s)
+  69:/usr/lib/avr/include/util/atomic.h **** {
+  70:/usr/lib/avr/include/util/atomic.h ****     SREG = *__s;
+ 230               		.loc 2 70 0
+ 231 00f8 9FBF      		out __SREG__,r25
+  71:/usr/lib/avr/include/util/atomic.h ****     __asm__ volatile ("" ::: "memory");
+ 232               		.loc 2 71 0
+ 233               	.LBE14:
+ 234               	.LBE13:
+ 235               	.LBE10:
+ 113:at90can_send_message.c **** 	#else
+ 114:at90can_send_message.c **** 		_transmission_in_progress = 1;
+ 115:at90can_send_message.c **** 	#endif
+ 116:at90can_send_message.c **** 	LEAVE_CRITICAL_SECTION;
+ 117:at90can_send_message.c **** 	
+ 118:at90can_send_message.c **** 	// enable transmission
+ 119:at90can_send_message.c **** 	CANCDMOB |= (1<<CONMOB0);
+ 236               		.loc 1 119 0
+ 237 00fa 8091 EF00 		lds r24,239
+ 238 00fe 8064      		ori r24,lo8(64)
+ 239 0100 8093 EF00 		sts 239,r24
+ 120:at90can_send_message.c **** 	
+ 121:at90can_send_message.c **** 	return (mob + 1);
+ 240               		.loc 1 121 0
+ 241 0104 81E0      		ldi r24,lo8(1)
+ 242 0106 810F      		add r24,r17
+ 243 0108 00C0      		rjmp .L11
+ 244               	.LVL19:
+ 245               	.L12:
+  96:at90can_send_message.c **** 		return 0;
+ 246               		.loc 1 96 0
+ 247 010a 80E0      		ldi r24,0
+ 248               	.L11:
+ 249               	/* epilogue start */
+ 122:at90can_send_message.c **** }
+ 250               		.loc 1 122 0
+ 251 010c DF91      		pop r29
+ 252 010e CF91      		pop r28
+ 253               	.LVL20:
+ 254 0110 1F91      		pop r17
+ 255               	.LVL21:
+ 256 0112 0895      		ret
+ 257               		.cfi_endproc
+ 258               	.LFE19:
+ 260               	.Letext0:
+ 261               		.file 3 "/usr/lib/avr/include/stdint.h"
+ 262               		.file 4 "../can.h"
+ 263               		.file 5 "at90can_private.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 at90can_send_message.c
+     /tmp/ccWtU2f0.s:2      *ABS*:0000003e __SP_H__
+     /tmp/ccWtU2f0.s:3      *ABS*:0000003d __SP_L__
+     /tmp/ccWtU2f0.s:4      *ABS*:0000003f __SREG__
+     /tmp/ccWtU2f0.s:5      *ABS*:0000003b __RAMPZ__
+     /tmp/ccWtU2f0.s:6      *ABS*:00000000 __tmp_reg__
+     /tmp/ccWtU2f0.s:7      *ABS*:00000001 __zero_reg__
+     /tmp/ccWtU2f0.s:13     .text:00000000 at90can_copy_message_to_mob
+     /tmp/ccWtU2f0.s:162    .text:000000bc can_send_message
+
+UNDEFINED SYMBOLS
+_find_free_mob
+_enable_mob_interrupt
+_free_buffer
