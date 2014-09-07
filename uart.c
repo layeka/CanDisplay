@@ -1,11 +1,32 @@
 /*
-File:		uart.c
+Copyright (c) 2014, Andy Hempel
+All rights reserved.
 
-Project: 	Robiarm
-Author:		Andy Hempel
-Date:		08.06.09
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the {organization} nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
 
 #include <stdint.h>
 #include <avr/io.h>
@@ -81,7 +102,7 @@ ISR(USART0_RX_vect)
 
 ISR(USART1_RX_vect)
 {
-   void (*bootloader)( void ) = 0x0C00;  // Achtung Falle: Hier Word-Adresse
+   void (*bootloader)( void ) = 0x0C00; 
    
    rx_buffer[rx_counter] = UDR1;
    
@@ -132,7 +153,6 @@ uint8_t get_uart(uint8_t pointer)
 	return rx_buffer[pointer];
 }
 
-// initialization function
 void uart_init(void)
 {
 
@@ -231,188 +251,6 @@ void CmdChk(void)
 			rawCoolTempValue += 10;
 			break;
          
-#ifdef __UARTDEBUG__
-		case 1:  // Debug informations
-			// OilTemp debug
-			if(rx_buffer[1] & 0x01) 
-			{
-				vdoOilTemp.sim = 1;
-			}
-			else
-			{
-				vdoOilTemp.sim = 0;
-			}				
-			
-			// WatTemp debug
-			if(rx_buffer[1] & 0x02) 
-			{
-				vdoWaterTemp.sim = 1;
-			}
-			else
-			{
-				vdoWaterTemp.sim = 0;
-			}
-			
-			// Boost debug
-			if(rx_buffer[1] & 0x04) 
-			{
-				boost.sim = 1;
-			}
-			else
-			{
-				boost.sim = 0;
-			}
-			
-			// Oil pressure debug
-			if(rx_buffer[1] & 0x08) 
-			{
-				vdoOilPress.sim = 1;
-			}
-			else
-			{
-				vdoOilPress.sim = 0;
-			}
-			
-			// RPM Speed debug
-			if(rx_buffer[1] & 0x10)
-			{
-				counter_speed_rpm_stop();
-			}
-			else
-			{
-				counter_speed_rpm_init();
-			}
-			
-			// LED flasher debug
-			if(rx_buffer[1] & 0x20)
-			{
-				WARNING_LED_PORT &= ~(1<<WARNING_LED_PIN);
-				leddebug = 1;
-			}
-			else
-			{
-				WARNING_LED_DDR |= (1<<WARNING_LED_PIN);
-				leddebug = 0;
-			}
-			
-			break;
-		
-		case 2: // change screen
-			menu_cnt = rx_buffer[1];
-			break;
-		
-		case 3: // request for settings
-			// 8bit values
-			// Byte 0-8
-			for (uint8_t i=0;i<9;i++)
-			{
-				uart_putc(eeprom_read_byte(&eeprom_8bit_array[i]));
-			}
-			// 16bit values
-			// Byte 9-14
-			for (uint8_t i=0;i<3;i++)
-			{
-				uart_putc((eeprom_read_word(&eeprom_16bit_array[i])&0x00FF));
-				uart_putc((eeprom_read_word(&eeprom_16bit_array[i]))>>8);
-			}
-			// oiltemp values
-			// Byte 15-18
-			for (uint8_t i=0;i<4;i++)
-			{
-				uart_putc(vdoOilTemp.label[i]);
-			}
-			// oiltemp phys. uint
-			// Byte 19-18
-			for (uint8_t i=0;i<4;i++)
-			{
-				uart_putc(vdoOilTemp.label[i]);
-			}
-			break;
-			
-		case 4:
-			// sensor curve length values
-			uart_putc((vdoOilTemp.length));
-			uart_putc((vdoWaterTemp.length));
-			uart_putc((vdoOilPress.length));
-			uart_putc((boost.length));
-			break;
-			
-		case 5:
-			// send values for oiltemp
-			for (uint8_t i=0;i<((vdoOilTemp.length));i++)
-			{
-				uart_putc(vdoOilTemp.curve[i]&0x00FF);
-				uart_putc(vdoOilTemp.curve[i]>>8);
-			}
-			// send values for watertemp
-			for (uint8_t i=0;i<((vdoWaterTemp.length));i++)
-			{
-				uart_putc(vdoWaterTemp.curve[i]&0x00FF);
-				uart_putc(vdoWaterTemp.curve[i]>>8);
-			}
-			// send values for oiltemp
-			for (uint8_t i=0;i<(vdoOilPress.length);i++)
-			{
-				uart_putc(vdoOilPress.curve[i]&0x00FF);
-				uart_putc(vdoOilPress.curve[i]>>8);
-			}
-			// send values for boost
-			for (uint8_t i=0;i<(boost.length);i++)
-			{
-				uart_putc(boost.curve[i]&0x00FF);
-				uart_putc(boost.curve[i]>>8);
-			}
-			break;
-			
-		case 10: // Oiltemp overwrite
-			vdoOilTemp.currentRaw  = (uint16_t)rx_buffer[2]<<8;
-			vdoOilTemp.currentRaw  |= rx_buffer[1];
-			break;
-			
-		case 11: // Watertemp overwrite
-			vdoWaterTemp.currentRaw = (uint16_t)rx_buffer[2]<<8;
-			vdoWaterTemp.currentRaw |= rx_buffer[1];
-			break;
-			
-		case 12: // Boost pressure overwrite
-			
-			boost.currentRaw = (uint16_t)rx_buffer[2]<<8;
-			boost.currentRaw |= rx_buffer[1];
-			break;	
-			
-		case 13: // Oil pressure overwrite
-			vdoOilPress.currentRaw = (uint16_t)rx_buffer[2]<<8;
-			vdoOilPress.currentRaw |= rx_buffer[1];
-			break;
-
-		case 14: // RPM overwrite
-			rpm_raw_value  = (uint16_t)rx_buffer[2]<<8;
-			rpm_raw_value |= rx_buffer[1];
-			break;
-			
-		case 15: // RPM overwrite
-			speed_raw_value  = (uint16_t)rx_buffer[2]<<8;
-			speed_raw_value |= rx_buffer[1];
-			break;
-		
-		case 16: // Day light 
-			lcd_bright_day = rx_buffer[1];
-			break;
-		
-		case 17: // Night light 
-			lcd_bright_day = rx_buffer[1];
-			break;
-		
-		case 18: // LCD Contrast
-			lcd_contrast = rx_buffer[1];
-			lcd_set_contrast(lcd_contrast);
-			break;
-		
-		case 19: // flasher PWM
-			flasher_pwm_state = rx_buffer[1];
-			break;
-#endif			
-
 		/* default is for errors or unknown commands */
 		default:
 			uart_puts_line("X");
