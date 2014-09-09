@@ -14,7 +14,7 @@ But it also should run on Olimex AVR-CAN.
 It uses the CAN Lib from 
 * http://www.kreatives-chaos.com/artikel/universelle-can-bibliothek
 
-<iframe width="560" height="315" src="//www.youtube.com/embed/r7DHyKKDtyk" frameborder="0" allowfullscreen></iframe>
+[![CanDisplay Video](http://img.youtube.com/vi/r7DHyKKDtyk/0.jpg)](http://youtu.be/r7DHyKKDtyk)
 
 License
 ----
