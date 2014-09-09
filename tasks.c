@@ -51,45 +51,80 @@ void task50ms(void)
 {
    startTask50ms();
    /* put code or functions below */
-   
-   char charBuff[8];
-   //cursor home 
-   lcd_home();           
-   lcd_puts("Wat:");
-   lcd_puts("      ");
-   lcd_gotoxy(4,0);
-   fixPointToAscii(rawCoolTempValue,charBuff,10);
-   lcd_puts(charBuff);
-   
-   
-   lcd_gotoxy(0,1);
-   lcd_puts("AiT:");
-   lcd_puts("      ");
-   lcd_gotoxy(4,1);
-   fixPointToAscii(rawAirTempValue,charBuff,10);
-   lcd_puts(charBuff);
-   
-   lcd_gotoxy(0,2);
-   lcd_puts("FuT:");
-   lcd_puts("      ");  
-   lcd_gotoxy(4,2);      
-   fixPointToAscii(rawFuelTempValue,charBuff,10);
-   lcd_puts(charBuff);
-   
-   lcd_gotoxy(0,3);
-   lcd_puts("OiT:");
-   lcd_puts("      "); 
-   lcd_gotoxy(4,3);
-   fixPointToAscii(rawOilTempValue,charBuff,10);
-   lcd_puts(charBuff);
-   
-   lcd_gotoxy(10,0);
-   lcd_puts("RPM:");
-   lcd_puts("      "); 
-   lcd_gotoxy(14,0);
-   fixPointToAscii(rawRpmValue,charBuff,1);
-   lcd_puts(charBuff);
-   
+   switch(cntMenu)
+   {
+      case 0:
+         {
+            char charBuff[8];
+            //cursor home 
+            lcd_home();           
+            lcd_puts("Wat:");
+            lcd_puts("      ");
+            lcd_gotoxy(4,0);
+            fixPointToAscii(rawCoolTempValue,charBuff,10);
+            lcd_puts(charBuff);
+            
+            
+            lcd_gotoxy(0,1);
+            lcd_puts("AiT:");
+            lcd_puts("      ");
+            lcd_gotoxy(4,1);
+            fixPointToAscii(rawAirTempValue,charBuff,10);
+            lcd_puts(charBuff);
+            
+            lcd_gotoxy(0,2);
+            lcd_puts("FuT:");
+            lcd_puts("      ");  
+            lcd_gotoxy(4,2);      
+            fixPointToAscii(rawFuelTempValue,charBuff,10);
+            lcd_puts(charBuff);
+            
+            lcd_gotoxy(0,3);
+            lcd_puts("OiT:");
+            lcd_puts("      "); 
+            lcd_gotoxy(4,3);
+            fixPointToAscii(rawOilTempValue,charBuff,10);
+            lcd_puts(charBuff);
+         }
+            break;
+         
+         case 1:
+         {
+            char charBuff[8];
+            //cursor home 
+            lcd_home(); 
+            lcd_puts("RPM:");
+            lcd_puts("      "); 
+            lcd_gotoxy(4,0);
+            fixPointToAscii(rawRpmValue,charBuff,1);
+            lcd_puts(charBuff);
+            
+            lcd_gotoxy(0,1);
+            lcd_puts("ThV:");
+            lcd_puts("      ");
+            lcd_gotoxy(4,1);
+            fixPointToAscii(rawThrottleValue,charBuff,10);
+            lcd_puts(charBuff);
+            
+            lcd_gotoxy(0,2);
+            lcd_puts("MAF:");
+            lcd_puts("      ");  
+            lcd_gotoxy(4,2);      
+            fixPointToAscii(rawMafPresValue,charBuff,10);
+            lcd_puts(charBuff);
+            
+            lcd_gotoxy(0,3);
+            lcd_puts("CoP:");
+            lcd_puts("      "); 
+            lcd_gotoxy(4,3);
+            fixPointToAscii(rawCoolPresValue,charBuff,10);
+            lcd_puts(charBuff);
+         }
+            break;
+         
+         default:
+            break;
+   }
    /* put code or functions above */
    endTask50ms();
 }

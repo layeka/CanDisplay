@@ -188,12 +188,12 @@ int main(void)
    
          if(encoder & 0x01)
          {
-            rawFuelTempValue++;
+            cntMenu++;
             encoder &= ~(1<<0);            
          }
          if(encoder & 0x02)
          {
-            rawFuelTempValue--;
+            cntMenu--;
             encoder &= ~(1<<1);            
          }
          
