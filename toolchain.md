@@ -1,6 +1,8 @@
 CanDisplay - Toolchain
 ======================
 
+This Readme is not finished!!!
+
 The following steps are for Windows development.
 
 1. Download Atmels AVR 8Bit Toolchain
