@@ -1,0 +1,10 @@
+#Make file for building DLL
+
+DllFile.dll : ObjFile.o
+	@mingw32-g++.exe -shared -Wl,--dll  "\\192.168.1.234\avr\CanDisplay\info\node_simulation\haltech_ecu.o"  -o "\\192.168.1.234\avr\CanDisplay\info\node_simulation\haltech_ecu.dll"  "C:\Program Files (x86)\BUSMASTER_v2.3.0\SimulatedSystems\OBJ\libWrapper_CAN.a"
+
+
+ObjFile.o : //192.168.1.234/avr/CanDisplay/info/node_simulation/haltech_ecu.cpp
+	g++ -x c++ -I"C:\Program Files (x86)\BUSMASTER_v2.3.0\SimulatedSystems\include" -c "\\192.168.1.234\avr\CanDisplay\info\node_simulation\haltech_ecu.cpp"   -o "\\192.168.1.234\avr\CanDisplay\info\node_simulation\haltech_ecu.o" -mwindows 
+
+

@@ -38,6 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <avr/interrupt.h>
 
 #include "main.h"
+#include "tasks.h"
 #include "can.h"
 #include "uart.h"
 
@@ -81,7 +82,7 @@ these conversions. All pressures are absolute, and it is necessary to subtract 1
 the final result if gauge pressure is desired.
 */
 //######################################################################
-char * fixPointToAscii(int16_t num, char *str, uint16_t div);
+
 #define KTOC_OFS 273
 int16_t kelvToInt(uint16_t kelv);
 
@@ -104,100 +105,87 @@ uint16_t rawOilTempValue = 0;
 int main(void)
 {
    char charBuff[8];
-      
+   uint8_t cntLcd = 0;   
    lcd_init();
-            
+   taskTimer_init();
+   
+          
+   
    // init CAN controller
    // Haltech CAN Baud rate is 1000kBits/sec --> 1MBit/sec
    can_init(BITRATE_1_MBPS);
-	
+
+   
    // passive mode 
-   can_set_mode(LISTEN_ONLY_MODE);
-   
-   // filter for all messages
-   can_filter_t fltMsg;
-   fltMsg.id = 0x360;
-   
-   // set can filter
-   can_set_filter(0, &fltMsg);
-   
+   //can_set_mode(LISTEN_ONLY_MODE);
+ // create a new filter for receiving all messages
+   can_filter_t filter = 
+   {
+    .id = 0,
+    .mask = 0,
+    .flags = { .rtr = 0, .extended = 0 }
+   };
+
    // message structure
    can_t msg;
+
+   // set can filter
+   can_set_filter(0, &filter);
+
+   
+   // enable interrupts
+   sei();   
+        
 	// start main loop ********************
 	while(1)
 	{
+      //task10ms();
+      task50ms();
+      //task100ms();
+      //task250ms();
+      //task1000ms();
+      
       CmdChk(); // check received uart commands
       
-      if(can_check_message())
+      
+   
+   if(can_check_message())
+   {         
+      can_get_message(&msg);
       {
-         can_get_message(&msg);
-        
-         if(msg.id==0x360)
-         {
-               rawRpmValue = ((uint16_t)msg.data[0]<<8); // high nibble
-               rawRpmValue = rawRpmValue | (0xFF & msg.data[1]); // high nibble
-               
-               rawThrottleValue = ((uint16_t)msg.data[2]<<8); // high nibble
-               rawThrottleValue = rawThrottleValue | (0xFF & msg.data[3]); // high nibble
-               
-               rawMafPresValue = ((uint16_t)msg.data[4]<<8); // high nibble
-               rawMafPresValue = rawMafPresValue | (0xFF & msg.data[5]); // high nibble
-               
-               rawCoolPresValue = ((uint16_t)msg.data[6]<<8); // high nibble
-               rawCoolPresValue = rawCoolPresValue | (0xFF & msg.data[7]); // high nibble
-         }
-         if(msg.id==0x3E0)
-         {
-               rawCoolTempValue = ((uint16_t)msg.data[0]<<8); // high nibble
-               rawCoolTempValue = rawCoolTempValue | (0xFF & msg.data[1]); // high nibble
-               
-               rawAirTempValue = ((uint16_t)msg.data[2]<<8); // high nibble
-               rawAirTempValue = rawAirTempValue | (0xFF & msg.data[3]); // high nibble
-               
-               rawFuelTempValue = ((uint16_t)msg.data[4]<<8); // high nibble
-               rawFuelTempValue = rawFuelTempValue | (0xFF & msg.data[5]); // high nibble
-               
-               rawOilTempValue = ((uint16_t)msg.data[6]<<8); // high nibble
-               rawOilTempValue = rawOilTempValue | (0xFF & msg.data[7]); // high nibble
-         }
-         } 
-         
-           
-         //   
-            // cursor home 
-            lcd_home();           
-            lcd_puts("Wat:");
-            lcd_puts("      ");
-            lcd_gotoxy(4,0);
-            //utoa(rawCoolTempValue,charBuff,10);
-            fixPointToAscii(rawCoolTempValue,charBuff,100);
-            lcd_puts(charBuff);
+
+      if(msg.id==0x360)
+      {
+            rawRpmValue = ((uint16_t)msg.data[0]<<8); // high nibble
+            rawRpmValue = rawRpmValue | (0xFF & msg.data[1]); // high nibble
             
+            rawThrottleValue = ((uint16_t)msg.data[2]<<8); // high nibble
+            rawThrottleValue = rawThrottleValue | (0xFF & msg.data[3]); // high nibble
             
-            lcd_gotoxy(0,1);
-            lcd_puts("AiT:");
-            lcd_puts("      ");
-            lcd_gotoxy(4,1);
-            //utoa(rawAirTempValue,charBuff,10);
-            fixPointToAscii(rawAirTempValue,charBuff,10);
-            lcd_puts(charBuff);
+            rawMafPresValue = ((uint16_t)msg.data[4]<<8); // high nibble
+            rawMafPresValue = rawMafPresValue | (0xFF & msg.data[5]); // high nibble
             
-            lcd_gotoxy(0,2);
-            lcd_puts("FuT:");
-            lcd_puts("      ");  
-            lcd_gotoxy(4,2);      
-            //utoa(rawFuelTempValue,charBuff,10);
-            fixPointToAscii(rawFuelTempValue,charBuff,0);
-            lcd_puts(charBuff);
+            rawCoolPresValue = ((uint16_t)msg.data[6]<<8); // high nibble
+            rawCoolPresValue = rawCoolPresValue | (0xFF & msg.data[7]); // high nibble
+      }
+      if(msg.id==0x3E0)
+      {
+            rawCoolTempValue = ((uint16_t)msg.data[0]<<8); // high nibble
+            rawCoolTempValue = rawCoolTempValue | (0xFF & msg.data[1]); // high nibble
             
-            lcd_gotoxy(0,3);
-            lcd_puts("OiT:");
-            lcd_puts("      "); 
-            lcd_gotoxy(4,3);
-            //utoa(rawOilTempValue,charBuff,10);
-            fixPointToAscii(rawOilTempValue,charBuff,1000);
-            lcd_puts(charBuff);
+            rawAirTempValue = ((uint16_t)msg.data[2]<<8); // high nibble
+            rawAirTempValue = rawAirTempValue | (0xFF & msg.data[3]); // high nibble
             
+            rawFuelTempValue = ((uint16_t)msg.data[4]<<8); // high nibble
+            rawFuelTempValue = rawFuelTempValue | (0xFF & msg.data[5]); // high nibble
+            
+            rawOilTempValue = ((uint16_t)msg.data[6]<<8); // high nibble
+            rawOilTempValue = rawOilTempValue | (0xFF & msg.data[7]); // high nibble
+      }
+      
+      }
+   }
+   
          if(encoder & 0x01)
          {
             rawFuelTempValue++;
@@ -209,8 +197,10 @@ int main(void)
             encoder &= ~(1<<1);            
          }
          
-      rawOilTempValue++;
-      _delay_ms(100);
+      //rawOilTempValue++;
+      //_delay_ms(100);
+      cntLcd++;
+      
    }
 return 0;
 }
@@ -231,7 +221,7 @@ char * fixPointToAscii(int16_t num, char *str, uint16_t div)
       *str++ = ' ';
    }
    
-   if(div!=0)
+   if(div>1)
    {
       itoa(num/div,str,10);
       strcat(str,".");

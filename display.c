@@ -43,6 +43,7 @@ void lcd_init()
    // cursor invisible ESC[?25l
    uart_putc(27); // vt100 esc
    uart_puts("[?25l");
+   lcd_clr();
 }
 
 void lcd_clr()

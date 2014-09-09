@@ -1,0 +1,5 @@
+g++.exe: error: \192.168.1.234\avr\CanDisplay\info\node_simulation\haltech_ecu.cpp: No such file or directory
+g++.exe: warning: '-x c++' after last input file has no effect
+g++.exe: fatal error: no input files
+compilation terminated.
+mingw32-make.exe: *** [ObjFile.o] Error 1

@@ -41,5 +41,6 @@ uint16_t rawAirTempValue;
 uint16_t rawFuelTempValue;
 uint16_t rawOilTempValue;
 
+extern char * fixPointToAscii(int16_t num, char *str, uint16_t div);
 
 #endif // main_h
